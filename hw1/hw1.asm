@@ -62,10 +62,10 @@ zero_args:
 start_coding_here:
     # Start the assignment by writing your code here
     lw $s0, addr_arg0 # $s0 = first argument = starting address of the strings
+    move $s4, $a0 # move number of arguments to s4
 
     # Checking the length of the first argument
     li $s1, 0 # length counter = $s1 = 0 
-    li $s2, 1 # max length of first argument
 
     lbu $s3, ($s0) # contains the first character of the first argument
 
@@ -78,36 +78,37 @@ start_coding_here:
 
     done_counting:
     # if number > 1: error
-        bgt $s1 $s2 print_invalid_operation_error
+        bgt $s1, 1 print_invalid_operation_error
     
     # else check if first argument is F, C or 2
-    # overwrite other registers
     verify_arg0:
         li $s0, 70 # 'F'
         li $s1, 67 # 'C'
         li $s2, 50 # '2' == 50 in decimal
         beq $s0, $s3, arg0_is_F
         beq $s1, $s3, arg0_is_C
-        beq $s2, $s3, arg0_is_2 #ERROR why?
+        beq $s2, $s3, arg0_is_2 
         # not equal to F, C or 2
         j print_invalid_operation_error
 
-    #testing
-    move $a0, $s3
-    li $v0, 1
-
     arg0_is_F:
-        j print_arg0
-
-    arg0_is_C:
+        # there must be exactly one other argument --> $s4 should be 2
+        bne $s4, 2, print_invalid_operation_error
         j print_arg0
 
     arg0_is_2:
+        # there must be exactly one other argument --> $s4 should be 2
+        bne $s4, 2, print_invalid_operation_error
+        j print_arg0
+
+    arg0_is_C:
+        # the must be exactly three other arguments --> $s4 should be 4
+        bne $s4, 4, print_invalid_operation_error
         j print_arg0
 
     print_arg0: #DELETE LATER
+        li $v0, 1 #print decimal of ascii value
         move $a0, $s3
-        li $v0, 1
         syscall
         j exit
 
