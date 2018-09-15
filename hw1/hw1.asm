@@ -1,3 +1,4 @@
+
 # Neil Opena
 # nopena
 # 110878452
@@ -62,23 +63,58 @@ start_coding_here:
     # Start the assignment by writing your code here
     lw $s0, addr_arg0 # $s0 = first argument = starting address of the strings
 
-    # First check the length of the first argument (it is still a string)
+    # Checking the length of the first argument
+    li $s1, 0 # length counter = $s1 = 0 
+    li $s2, 1 # max length of first argument
 
-    # Have a loop increment a value until the null terminator to get the length of the string
-    # Initialize $s1 = 0 = length counter
-    li $s1, 0
+    lbu $s3, ($s0) # contains the first character of the first argument
 
     count_arg0_length:  #loop (count length of arg0)
-        lbu $s2, ($s0)
-        beqz $s2, done_counting # null terminator reached
+        lbu $t0, ($s0) 
+        beqz $t0, done_counting # null terminator reached
         addi $s1, $s1, 1 # increment counter
         addi $s0, $s0, 1 # advance to the next character
         j count_arg0_length
 
     done_counting:
-    move $a0, $s1
+    # if number > 1: error
+        bgt $s1 $s2 print_invalid_operation_error
+    
+    # else check if first argument is F, C or 2
+    # overwrite other registers
+    verify_arg0:
+        li $s0, 70 # 'F'
+        li $s1, 67 # 'C'
+        li $s2, 50 # '2' == 50 in decimal
+        beq $s0, $s3, arg0_is_F
+        beq $s1, $s3, arg0_is_C
+        beq $s2, $s3, arg0_is_2 #ERROR why?
+        # not equal to F, C or 2
+        j print_invalid_operation_error
+
+    #testing
+    move $a0, $s3
     li $v0, 1
-    syscall #testing - print out length of first arg
+
+    arg0_is_F:
+        j print_arg0
+
+    arg0_is_C:
+        j print_arg0
+
+    arg0_is_2:
+        j print_arg0
+
+    print_arg0: #DELETE LATER
+        move $a0, $s3
+        li $v0, 1
+        syscall
+        j exit
+
+    print_invalid_operation_error:
+        la $a0, invalid_operation_error
+        li $v0, 4
+        syscall
 
 exit:
     li $v0, 10   # terminate program
