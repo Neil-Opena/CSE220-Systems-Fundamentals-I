@@ -98,6 +98,7 @@ start_coding_here:
         # interpret as string of hexadecimal digits
         lw $s0, addr_arg1
         li $s1, 0 # hexadecimal character counter
+        li $s3, 0 # container for hexadecimal value
 
         verify_hexadecimal_string:
             # count the input string, cannot be less than or greater than 8
@@ -115,7 +116,15 @@ start_coding_here:
             bgt $s2, 70, print_invalid_args_error
 
             blt $s2, 65, continue_check
-            valid_hex:
+            valid_hex_character:
+                addi $s2, $s2, -7 # subtract 7 so conversion is correct
+            
+            valid_hex_integer:
+                addi $s2, $s2, -48
+
+            convert_hex:
+                sll $s3, $s3, 4
+                add $s3, $s3, $s2 
 
             addi $s1, $s1, 1 # increment counter
             addi $s0, $s0, 1 # go to next character
@@ -124,10 +133,20 @@ start_coding_here:
 
         continue_check:
             bgt $s2, 57, print_invalid_args_error
-            j valid_hex
+            j valid_hex_integer
 
         check_if_less:
             blt $s1, 8, print_invalid_args_error
+
+        # 1 - sign bit, 8 - exponent (don't forget about bias), 23 - mantissa
+
+        #get the sign bit first
+
+        #print hexadecimal value?
+        li $v0, 1
+        move $a0, $s3
+        syscall
+
 
         j exit
 
