@@ -105,11 +105,26 @@ start_coding_here:
             bgt $s1, 8, print_invalid_args_error
             beqz $s2, check_if_less
             # check each character
-            #####
+            # [48 - 57] = "0" - "9"
+            # [65 - 70] = "A" - "F"
+            # if ( val < 48 ) error
+            # if (val > 70) error
+
+            # if (val < 65) && (val > 57) error
+            blt $s2, 48, print_invalid_args_error
+            bgt $s2, 70, print_invalid_args_error
+
+            blt $s2, 65, continue_check
+            valid_hex:
+
             addi $s1, $s1, 1 # increment counter
             addi $s0, $s0, 1 # go to next character
             
             j verify_hexadecimal_string
+
+        continue_check:
+            bgt $s2, 57, print_invalid_args_error
+            j valid_hex
 
         check_if_less:
             blt $s1, 8, print_invalid_args_error
