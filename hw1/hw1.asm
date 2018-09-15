@@ -99,7 +99,57 @@ start_coding_here:
     arg0_is_2:
         # there must be exactly one other argument --> $s4 should be 2
         bne $s4, 2, print_invalid_args_error
-        j print_arg0
+
+        # interpret as two's complement number
+        lw $s0, addr_arg1
+        li $s1, 0 # 2s complement counter
+        li $s3, 0 # contains the actually binary, not the string
+
+        verify_2s_complement:
+            # count the input string, cannot be greater than 32, can only be '1' or '0'
+            lbu $s2, ($s0)
+            bgt $s1, 32, print_invalid_args_error # counter greater than 32
+            beqz $s2, check_sign
+            # need a way to verify if '1' or '0'
+            # 48 == '0', 49 == '1'
+            blt $s2, 48, print_invalid_args_error 
+            bgt $s2, 49, print_invalid_args_error
+            addi $s1, $s1, 1 # increment counter
+            addi $s0, $s0, 1 # go to next character
+            
+            sll $s3, $s3, 1 # shift makes room
+            addi $t0, $s2, -48 # get 0 or 1
+            add $s3, $s3, $t0 # 'append'
+            
+            j verify_2s_complement
+
+
+        check_sign:
+            # first look at msb (0 == positive)
+            lw $s0, addr_arg1
+            lbu $s2, ($s0)
+            beq $s2, 48, print_2s_complement
+
+            #logic is wrong
+            # there should be 22 1s starting from msb
+
+            li $t0, 0 
+            append_1s: 
+                beqz $s1, sign_extend #s1 = num of inputs
+                sll $t0, $t0, 1
+                addi $t0, $t0, 1
+                addi $s1, $s1, -1
+                j append_1s  # continually append 1s 
+
+            sign_extend:
+                xori $t0, $t0, 0xFFFFFFFF  # flip 1s to 0s
+                or $s3, $s3, $t0
+
+        print_2s_complement:
+            move $a0, $s3
+            li $v0, 1
+            syscall
+            j exit
 
     arg0_is_C:
         # the must be exactly three other arguments --> $s4 should be 4
