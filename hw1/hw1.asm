@@ -94,7 +94,27 @@ start_coding_here:
     arg0_is_F:
         # there must be exactly one other argument --> $s4 should be 2
         bne $s4, 2, print_invalid_args_error
-        j print_arg0
+
+        # interpret as string of hexadecimal digits
+        lw $s0, addr_arg1
+        li $s1, 0 # hexadecimal character counter
+
+        verify_hexadecimal_string:
+            # count the input string, cannot be less than or greater than 8
+            lbu $s2, ($s0)
+            bgt $s1, 8, print_invalid_args_error
+            beqz $s2, check_if_less
+            # check each character
+            #####
+            addi $s1, $s1, 1 # increment counter
+            addi $s0, $s0, 1 # go to next character
+            
+            j verify_hexadecimal_string
+
+        check_if_less:
+            blt $s1, 8, print_invalid_args_error
+
+        j exit
 
     arg0_is_2:
         # there must be exactly one other argument --> $s4 should be 2
@@ -154,12 +174,6 @@ start_coding_here:
     arg0_is_C:
         # the must be exactly three other arguments --> $s4 should be 4
         bne $s4, 4, print_invalid_args_error
-        j print_arg0
-
-    print_arg0: #DELETE LATER
-        li $v0, 1 #print decimal of ascii value
-        move $a0, $s3
-        syscall
         j exit
 
     print_invalid_operation_error:
