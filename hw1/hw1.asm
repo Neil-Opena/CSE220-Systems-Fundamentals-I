@@ -93,17 +93,17 @@ start_coding_here:
 
     arg0_is_F:
         # there must be exactly one other argument --> $s4 should be 2
-        bne $s4, 2, print_invalid_operation_error
+        bne $s4, 2, print_invalid_args_error
         j print_arg0
 
     arg0_is_2:
         # there must be exactly one other argument --> $s4 should be 2
-        bne $s4, 2, print_invalid_operation_error
+        bne $s4, 2, print_invalid_args_error
         j print_arg0
 
     arg0_is_C:
         # the must be exactly three other arguments --> $s4 should be 4
-        bne $s4, 4, print_invalid_operation_error
+        bne $s4, 4, print_invalid_args_error
         j print_arg0
 
     print_arg0: #DELETE LATER
@@ -116,6 +116,13 @@ start_coding_here:
         la $a0, invalid_operation_error
         li $v0, 4
         syscall
+        j exit
+
+    print_invalid_args_error:
+        la $a0, invalid_args_error
+        li $v0, 4
+        syscall
+        j exit
 
 exit:
     li $v0, 10   # terminate program
