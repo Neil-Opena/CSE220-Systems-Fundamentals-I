@@ -171,7 +171,7 @@ start_coding_here:
 
             check_special_cases:
                 beqz $s1, print_hex_zero 
-                beq $s1, 0x000000FF, print_hex_infinity
+                beq $s1, 0x000000FF, print_hex_f_exponent
 
             subtract_bias: 
                 addi $s4, $s1, -127
@@ -190,7 +190,7 @@ start_coding_here:
         # dont forget to store the first bit of the 3rd character as the last bit of the exponent
         # to get last 23 bits --> mask with and 0000 0000 0111 F F F F F
 
-        andi $s1, $s3, 0x007FFFFF #s1 contains the fractional part
+        andi $s1, $s0, 0x007FFFFF #s1 contains the fractional part
 
         addi $s2, $s2, 1
         #s2 = current 'index'
@@ -307,22 +307,28 @@ start_coding_here:
         syscall
         j exit
 
-    print_hex_infinity:
+    print_hex_f_exponent:
+        # need to determine if fractional number is 0 or nah
+        andi $s1, $s0, 0x007FFFFF #s1 contains the fractional part
+        beqz $s1, print_infinity
+        #else Nan
+        la $a0, NaN_str
+        li $v0, 4
+        syscall
+        j exit
+    
+    print_infinity:
         # need to print sign bit first
-        beqz $t1, print_pos_infinity
+        beqz $t1, load_pos_infinity_str
         la $a0, neg_infinity_str
         continue_printing_infinity:
         li $v0, 4
         syscall
         j exit
 
-    print_pos_infinity:
+    load_pos_infinity_str:
         la $a0, pos_infinity_str
         j continue_printing_infinity
-
-    print_hex_nan:
-        # need to print sign bit first
-        j exit
 
     print_invalid_operation_error:
         la $a0, invalid_operation_error
