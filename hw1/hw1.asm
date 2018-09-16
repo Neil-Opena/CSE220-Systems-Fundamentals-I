@@ -140,17 +140,39 @@ start_coding_here:
         check_if_less:
             blt $s1, 8, print_invalid_args_error
 
-        # 1 - sign bit, 8 - exponent (don't forget about bias), 23 - mantissa
+        # 1 - sign bit
         la $s2, float_string_before_exponent # s2 = floating string address
         la $s1, negative_sign # s1 negative sign address
         lbu $t0, ($s1)
 
         #get the sign bit first
         andi $s0, $s3, 0x80000000 #s0 = contains information about sign
-        beqz $s0, get_fraction
+        beqz $s0, get_exponent
         # negative
         sb $t0, ($s2)
         addi $s2, $s2, 1 # proceed to next byte address of string
+
+        # exponent range - 126 to 127 before bias
+        # first get 8 bits corresponding to exponent 0111 1111 1000 0000 0000 0000 0000 0000 --> 0x7F800000
+
+        # it might be better to calculate the exponent before the mantissa --> go straight to special cases
+        get_exponent:
+            move $s0, $s3 # clean things up --> move hexadecimal value to $s3
+            andi $s1, $s0, 0x7F800000  # s1 = exponent prior to bias subtraction
+            # need to convert to numerical value --> sra 23 times
+            li $t0, 23
+
+            convert_exponent_num:
+                beqz $t0, subtract_bias
+                sra $s1, $s1, 1
+                addi $t0, $t0, -1
+                j convert_exponent_num
+
+            subtract_bias: 
+                addi $s4, $s1, -127
+
+            #check if exponent = 0 or infinity
+
 
         get_fraction:
             # get a '1' and a '.' inserted
@@ -160,13 +182,60 @@ start_coding_here:
             addi $s2, $s2, 1 # proceed to next byte address 
             sb $t1, ($s2)
 
-        #print floating point string
-        la $s2, float_string_before_exponent # get original starting index
-        li $v0, 4
-        move $a0, $s2 #with positive numbers, it 
+        #get mantissa = 23 bits
+        # get last 6 characters
+        # dont forget to store the first bit of the 3rd character as the last bit of the exponent
+        # to get last 23 bits --> mask with and 0000 0000 0111 F F F F F
+
+        andi $s1, $s3, 0x007FFFFF #s1 contains the fractional part
+
+        addi $s2, $s2, 1
+        #s2 = current 'index'
+
+        #  need a way to convert the fractional part (hex) into binary
+        # need a way to read in each binary digit
+        # start with 0000 0000 0100 0000 0000 0000 0000 0000 = 0x00400000 and sra moving the 1 bit to each spot
+        # if 0 write 0, else write 1
+        # save the andi result and save into byte address 
+
+        li $t1, 0 # t1 = result of and operation
+        li $t2, 0x00400000
+        li $s3, 0 
+        li $t0, 23 # counter for 23 bits
+        read_mantissa:
+            beqz $t0, print_floating_point_str
+            and $t1, $s1, $t2
+            bgt $t1, $s3, result_1
+            #write 0
+            write_binary:
+            addi $t1, $t1, 48
+            sb $t1, ($s2)
+            sra $t2, $t2, 1
+            addi $t0, $t0, -1
+            addi $s2, $s2, 1 # move index of byte
+            j read_mantissa
+        
+        result_1:
+            li $t1, 1
+            j write_binary
+
+        # need to store a null pointer in the end
+        print_floating_point_str:
+            li $s1, 0
+            sb $s1, ($s2) # put a null terminator 
+
+            la $a0, float_string_before_exponent # get original starting index
+            li $v0, 4
+            syscall
+
+
+        #print exponent part
+        la $a0, floating_point_str #print 2_2*2^ part
         syscall
-
-
+        move $a0, $s4
+        li $v0, 1
+        syscall
+      
         j exit
 
     arg0_is_2:
