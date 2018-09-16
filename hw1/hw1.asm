@@ -326,12 +326,51 @@ start_coding_here:
             # check if character is valid
             bgt $t0, $t2, print_invalid_args_error
 
-            addi, $t1, $t1, 1 # increment n
-            addi, $s0, $s0, 1 # go to next character
+            addi $t1, $t1, 1 # increment n
+            addi $s0, $s0, 1 # go to next character
             
             j verify_num_to_convert
-        continue_converting_num:
 
+        continue_converting_num:
+            # go through the string again, but this time - 48 to get the numerical value, and then multiply by the source base raised to the n (which will decrement)
+            # store decimal value to register
+            lw $s0, addr_arg1 # get original starting index
+            li $s3, 0 # s3 = decimal value
+
+            addi $t1, $t1, -1 # decrement n by 1 so that it matches indices
+            li $t2, 0
+
+            get_decimal_value:
+                move $t2, $t1  # t2, t1 = (n -1)
+                li $s4, 1 # s4 = to_multiply current integer with (1 * base * base * ...)
+                lbu $t0, ($s0)
+
+
+                blt $t1, 0, done_converting_decimal
+
+                #unsure about mul instructions
+                get_source_exponent:
+                    # to_multiply = multiplying source * n
+                    beqz $t2, continue_multiply
+                    mult $s4, $s1
+                    mflo $s4
+                    addi $t2, $t2, -1
+                j get_source_exponent
+
+                continue_multiply:
+                    addi $t0, $t0, -48
+                    mult $s4, $t0
+                    mflo $s4
+                    add $s3, $s3, $s4
+
+                addi $t1, $t1, -1 # decrement i value, which is also the counter
+                addi $s0, $s0, 1 # go to next character
+            j get_decimal_value
+
+        done_converting_decimal:
+            move $a0, $s3
+            li $v0, 1
+            syscall
         j exit
 
     print_hex_zero:
