@@ -147,14 +147,23 @@ start_coding_here:
 
         #get the sign bit first
         andi $s0, $s3, 0x80000000 #s0 = contains information about sign
-        beqz $s0, get_exponent 
+        beqz $s0, get_fraction
         # negative
         sb $t0, ($s2)
+        addi $s2, $s2, 1 # proceed to next byte address of string
 
-        get_exponent:
+        get_fraction:
+            # get a '1' and a '.' inserted
+            li $t0, 49 # t0 = ascii value for 1
+            li $t1, 46 # t1 = ascii value for .
+            sb $t0, ($s2)
+            addi $s2, $s2, 1 # proceed to next byte address 
+            sb $t1, ($s2)
+
         #print floating point string
+        la $s2, float_string_before_exponent # get original starting index
         li $v0, 4
-        move $a0, $s2 #works but it is not the minus sign
+        move $a0, $s2 #with positive numbers, it 
         syscall
 
 
