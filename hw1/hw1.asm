@@ -275,9 +275,6 @@ start_coding_here:
             lbu $s2, ($s0)
             beq $s2, 48, print_2s_complement
 
-            #logic is wrong
-            # there should be 22 1s starting from msb
-
             li $t0, 0 
             append_1s: 
                 beqz $s1, sign_extend #s1 = num of inputs
@@ -367,11 +364,36 @@ start_coding_here:
                 addi $s0, $s0, 1 # go to next character
             j get_decimal_value
 
+ 
+        # s3 = decimal value
+        # s2 = target base
         done_converting_decimal:
-            move $a0, $s3
+            move $s0, $s3
+            li $t0, 0
+            sb $t0, ($sp)
+            addi $sp, $sp, -1 # add null pointer
+
+            # repeatedly divide and place byte in sp and advance by 4 
+            convert_to_target:
+                beqz $s0, print_converted_int
+                div $s0, $s2
+                mfhi $t0
+                mflo $s0
+
+                sb $t0, ($sp)
+                addi $sp, $sp, -1
+                j convert_to_target
+        
+        print_converted_int:
             li $v0, 1
+            addi $sp, $sp, 1
+            lbu $t0, ($sp)
+            beqz $t0, exit
+            move $a0, $t0
             syscall
-        j exit
+            j print_converted_int
+
+        # j exit
 
     print_hex_zero:
         la $a0, zero_str
