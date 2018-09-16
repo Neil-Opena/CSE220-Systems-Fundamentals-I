@@ -27,6 +27,8 @@ floating_point_str: .asciiz "_2*2^"
 nl: .asciiz "\n"
 
 # Put your additional .data declarations here, if any.
+float_string_before_exponent: .asciiz "**************************" #3 for possible -1., 23 for mantissa
+negative_sign: .asciiz "-"
 
 # Main program starts here
 .text
@@ -139,12 +141,20 @@ start_coding_here:
             blt $s1, 8, print_invalid_args_error
 
         # 1 - sign bit, 8 - exponent (don't forget about bias), 23 - mantissa
+        la $s2, float_string_before_exponent # s2 = floating string address
+        la $s1, negative_sign # s1 negative sign address
+        lbu $t0, ($s1)
 
         #get the sign bit first
+        andi $s0, $s3, 0x80000000 #s0 = contains information about sign
+        beqz $s0, get_exponent 
+        # negative
+        sb $t0, ($s2)
 
-        #print hexadecimal value?
-        li $v0, 1
-        move $a0, $s3
+        get_exponent:
+        #print floating point string
+        li $v0, 4
+        move $a0, $s2 #works but it is not the minus sign
         syscall
 
 
