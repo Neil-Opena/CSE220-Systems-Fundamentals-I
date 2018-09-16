@@ -299,6 +299,39 @@ start_coding_here:
     arg0_is_C:
         # the must be exactly three other arguments --> $s4 should be 4
         bne $s4, 4, print_invalid_args_error
+
+        lw $s0, addr_arg1 # s0 = addr of to convert
+
+        lw $s1, addr_arg2 # addr of source base
+        move $a0, $s1
+        li $v0, 84
+        syscall
+        move $s1, $v0
+
+        lw $s2, addr_arg3 # addr of target base
+        move $a0, $s2
+        li $v0, 84
+        syscall
+        move $s2, $v0
+
+        # t2 = max ascii value --> source base + 47
+        li $t2, 0
+        addi $t2, $s1, 47
+
+        li $t1, 0 # n = number of integer places
+        verify_num_to_convert:
+            lbu $t0, ($s0)
+            beqz $t0, continue_converting_num
+
+            # check if character is valid
+            bgt $t0, $t2, print_invalid_args_error
+
+            addi, $t1, $t1, 1 # increment n
+            addi, $s0, $s0, 1 # go to next character
+            
+            j verify_num_to_convert
+        continue_converting_num:
+
         j exit
 
     print_hex_zero:
