@@ -157,21 +157,24 @@ start_coding_here:
 
         # it might be better to calculate the exponent before the mantissa --> go straight to special cases
         get_exponent:
+            move $t1, $s0 # move sign bit information to t1
             move $s0, $s3 # clean things up --> move hexadecimal value to $s3
             andi $s1, $s0, 0x7F800000  # s1 = exponent prior to bias subtraction
             # need to convert to numerical value --> sra 23 times
             li $t0, 23
 
             convert_exponent_num:
-                beqz $t0, subtract_bias
+                beqz $t0, check_special_cases
                 sra $s1, $s1, 1
                 addi $t0, $t0, -1
                 j convert_exponent_num
 
+            check_special_cases:
+                beqz $s1, print_hex_zero 
+                beq $s1, 0x000000FF, print_hex_infinity
+
             subtract_bias: 
                 addi $s4, $s1, -127
-
-            #check if exponent = 0 or infinity
 
 
         get_fraction:
@@ -296,6 +299,29 @@ start_coding_here:
     arg0_is_C:
         # the must be exactly three other arguments --> $s4 should be 4
         bne $s4, 4, print_invalid_args_error
+        j exit
+
+    print_hex_zero:
+        la $a0, zero_str
+        li $v0, 4
+        syscall
+        j exit
+
+    print_hex_infinity:
+        # need to print sign bit first
+        beqz $t1, print_pos_infinity
+        la $a0, neg_infinity_str
+        continue_printing_infinity:
+        li $v0, 4
+        syscall
+        j exit
+
+    print_pos_infinity:
+        la $a0, pos_infinity_str
+        j continue_printing_infinity
+
+    print_hex_nan:
+        # need to print sign bit first
         j exit
 
     print_invalid_operation_error:
