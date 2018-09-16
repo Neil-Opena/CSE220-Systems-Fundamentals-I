@@ -364,36 +364,42 @@ start_coding_here:
                 addi $s0, $s0, 1 # go to next character
             j get_decimal_value
 
- 
-        # s3 = decimal value
-        # s2 = target base
         done_converting_decimal:
-            move $s0, $s3
+            move $s0, $s3 # s0 = decimal value
             li $t0, 0
-            sb $t0, ($sp)
-            addi $sp, $sp, -1 # add null pointer
+            sb $t0, ($sp) # place a null terminator at end of stack 
+            addi $sp, $sp, -1 
+            li $v0, 1 # print integer
 
             # repeatedly divide and place byte in sp and advance by 4 
+            li $t1, 0 # helper variable to determine if stack was used or not
             convert_to_target:
-                beqz $s0, print_converted_int
-                div $s0, $s2
-                mfhi $t0
-                mflo $s0
+                beqz $s0, print_converted_int # keep dividing until quotient is 0
+                addi $t1, $t1, 1
+                div $s0, $s2 # s2 = target base
+                mfhi $t0 # remainder
+                mflo $s0 # quotient
 
-                sb $t0, ($sp)
-                addi $sp, $sp, -1
+                sb $t0, ($sp) # put remainder in the stack
+                addi $sp, $sp, -1 # advance stack pointer
                 j convert_to_target
         
         print_converted_int:
-            li $v0, 1
-            addi $sp, $sp, 1
+            beqz $t1, print_0 # stack not used --> answer = 0
+            addi $sp, $sp, 1 # change stack pointer for retrieval
+
             lbu $t0, ($sp)
             beqz $t0, exit
+
             move $a0, $t0
             syscall
             j print_converted_int
 
-        # j exit
+
+        print_0:
+            li $a0, 0
+            syscall
+            j exit
 
     print_hex_zero:
         la $a0, zero_str
