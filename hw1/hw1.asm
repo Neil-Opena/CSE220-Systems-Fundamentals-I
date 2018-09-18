@@ -374,7 +374,7 @@ start_coding_here:
             # repeatedly divide and place byte in sp and advance by 4 
             li $t1, 0 # helper variable to determine if stack was used or not
             convert_to_target:
-                beqz $s0, print_converted_int # keep dividing until quotient is 0
+                beqz $s0, print_converted_int # keep dividing until quotient is 0 
                 addi $t1, $t1, 1
                 div $s0, $s2 # s2 = target base
                 mfhi $t0 # remainder
@@ -389,11 +389,16 @@ start_coding_here:
             addi $sp, $sp, 1 # change stack pointer for retrieval
 
             lbu $t0, ($sp)
-            beqz $t0, exit
+            beqz $t0, exit # ERROR
 
             move $a0, $t0
             syscall
             j print_converted_int
+
+            # IDEA, what if instead of having a null terminator, and a way to check if stack was used
+            # we saved the original stack address, and compare it at the end.....
+
+            # LOOOK AT SHEET AGAIN, instead of using stack just allocated memory
 
 
         print_0:
