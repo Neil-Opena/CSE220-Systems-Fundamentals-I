@@ -29,6 +29,8 @@ nl: .asciiz "\n"
 # Put your additional .data declarations here, if any.
 float_string_before_exponent: .asciiz "**************************" #3 for possible -1., 23 for mantissa
 negative_sign: .asciiz "-"
+reversed_number: .asciiz "********************************"
+formatted_number: .asciiz "********************************"
 
 # Main program starts here
 .text
@@ -366,45 +368,46 @@ start_coding_here:
 
         done_converting_decimal:
             move $s0, $s3 # s0 = decimal value
-            li $t0, 0
-            sb $t0, ($sp) # place a null terminator at end of stack 
-            addi $sp, $sp, -1 
-            li $v0, 1 # print integer
+            la $s3, reversed_number #$s3 = address of reversed number container
+            la $s4, formatted_number #$s4 = address of number container to print
 
-            # repeatedly divide and place byte in sp and advance by 4 
-            li $t1, 0 # helper variable to determine if stack was used or not
+            li $t0, 0
+            sb $t0, ($s3) #put a null terminator in the beginning (will signify the end when we go to reverse it)
+            addi $s3, $s3, 1 #go to next character
+
+            # repeatedly divide and store in reversed_number
             convert_to_target:
-                beqz $s0, print_converted_int # keep dividing until quotient is 0 
-                addi $t1, $t1, 1
                 div $s0, $s2 # s2 = target base
-                mfhi $t0 # remainder
+                mfhi $s1 # remainder
                 mflo $s0 # quotient
 
-                sb $t0, ($sp) # put remainder in the stack
-                addi $sp, $sp, -1 # advance stack pointer
+                addi $s1, $s1, 48 #covert to ascii character
+                sb $s1, ($s3) # store remainder in reversed number string
+
+                beqz $s0, reverse # keep dividing until quotient is 0 
+
+                addi $s3, $s3, 1 #advance to next character
+
                 j convert_to_target
         
-        print_converted_int:
-            beqz $t1, print_0 # stack not used --> answer = 0
-            addi $sp, $sp, 1 # change stack pointer for retrieval
+        reverse:
+            #go from index and keep subtracting 1, until null terminator
+            #add character to final string to print
+            lbu $t0, ($s3)
+            beqz $t0, print_formatted_number
+            sb $t0, ($s4)
+            addi $s4, $s4, 1
+            addi $s3, $s3, -1
+            j reverse
 
-            lbu $t0, ($sp)
-            beqz $t0, exit # ERROR
-
-            move $a0, $t0
+        print_formatted_number:
+            li $t0, 0
+            sb $t0 ($s4) # put a null terminator
+            la $a0, formatted_number
+            li $v0, 4
             syscall
-            j print_converted_int
+            j print_newline
 
-            # IDEA, what if instead of having a null terminator, and a way to check if stack was used
-            # we saved the original stack address, and compare it at the end.....
-
-            # LOOOK AT SHEET AGAIN, instead of using stack just allocated memory
-
-
-        print_0:
-            li $a0, 0
-            syscall
-            j exit
 
     print_hex_zero:
         la $a0, zero_str
