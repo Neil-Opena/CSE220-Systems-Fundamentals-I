@@ -239,7 +239,7 @@ start_coding_here:
         li $v0, 1
         syscall
       
-        j exit
+        j print_newline
 
     arg0_is_2:
         # there must be exactly one other argument --> $s4 should be 2
@@ -291,7 +291,7 @@ start_coding_here:
             move $a0, $s3
             li $v0, 1
             syscall
-            j exit
+            j print_newline
 
     arg0_is_C:
         # the must be exactly three other arguments --> $s4 should be 4
@@ -446,6 +446,11 @@ start_coding_here:
         li $v0, 4
         syscall
         j exit
+
+    print_newline:
+        la $a0, nl
+        li $v0, 4
+        syscall #no need to jump to exit here
 
 exit:
     li $v0, 10   # terminate program
