@@ -1,6 +1,6 @@
-# type your first and last name here
-# type your Net ID here (e.g., jmsmith)
-# type your SBU ID # here (e.g., 111234567)
+# Neil Opena
+# nopena
+# 110878452
 
 #####################################################################
 ############### DO NOT CREATE A .data SECTION! ######################
