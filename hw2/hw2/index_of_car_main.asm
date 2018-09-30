@@ -12,9 +12,9 @@ la $a0, index_of_car_output
 li $v0, 4
 syscall
 la $a0, all_cars
-li $a1, 8
+li $a1, 6
 li $a2, 0
-li $a3, 2017
+li $a3, 1942
 jal index_of_car
 move $a0, $v0
 li $v0, 1
