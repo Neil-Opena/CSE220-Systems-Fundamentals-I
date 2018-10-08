@@ -3,8 +3,8 @@
 .data
 nl: .asciiz "\n"
 memcpy_output: .asciiz "memcpy output: "
-src: .asciiz "ABCD"
-dest: .asciiz "**********"
+src: .asciiz "ABCDEFGHIJ"
+dest: .asciiz "XXXXXXX"
 
 .text
 .globl main
@@ -14,7 +14,14 @@ li $v0, 4
 syscall
 la $a0, src
 la $a1, dest
-li $a2, 4
+#Test 1 --> expected return value 0
+# li $a2, 3
+# Test 2 --> expected return value 0
+# li $a2, 7
+#Test 3 --> expected return value -1
+# li $a2, -3
+#Test 4 --> expected return value -1
+li $a2, 0
 jal memcpy
 move $a0, $v0
 li $v0, 1

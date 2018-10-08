@@ -151,10 +151,35 @@ strcmp:
 
 ### Part III ###
 memcpy:
-	li $v0, -200
-	li $v1, -200
 
-	jr $ra
+	# a0 = address of src
+	# a1 = address of dest, can assume that dest is at least n bytes
+	# a2 = n (must be greater than 0)
+
+	ble $a2, $0, failure_part_3
+
+	move $t0, $a0 # t0 = address for each src character
+	move $t1, $a1 # t1 = address for each dest character
+	li $t2, 0 # t2 = current index
+
+	li $t3, 0 # t3 = byte holder 
+
+	copy_byte_part_3:
+		bge $t2, $a2, success_part_3
+		lbu $t3, ($t0)
+		sb $t3, ($t1)
+
+		addi $t0, $t0, 1
+		addi $t1, $t1, 1
+		addi $t2, $t2, 1
+		j copy_byte_part_3
+
+	success_part_3:
+		li $v0, 0
+		jr $ra
+	failure_part_3:
+		li $v0, -1
+		jr $ra
 
 
 ### Part IV ###
