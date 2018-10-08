@@ -69,7 +69,7 @@ index_of_car:
 		lhu $t2, ($t1)
 		beq $t2, $a3, found_index
 
-		addi $t1, $t1, 16 #add 16 bytes --> go to the next car's 
+		addi $t1, $t1, 16 #add 16 bytes --> go to the next car's year
 		addi $t0, $t0, 1
 		j traverse
 	
