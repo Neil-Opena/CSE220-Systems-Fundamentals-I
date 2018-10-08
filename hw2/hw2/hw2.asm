@@ -184,12 +184,28 @@ memcpy:
 
 ### Part IV ###
 insert_car:
-	li $v0, -200
-	li $v1, -200
-	
 
-	jr $ra
-	
+	#must call memcpy()
+
+	# be careful when calling memcpy --> would probably use s registers or something
+
+	# a0 = pointer to arrays of cars
+	# a1 = number of cars in array
+	# a2 = pointer to new car to insert
+	# a3 = index at which to be inserted
+
+	blt $a1, $0, failure_part_4 # length < 0
+	blt $a3, $0, failure_part_4 # index < 0
+	bgt $a3, $a1, failure_part_4 # index > length
+
+
+
+	success_part_4:
+		li $v0, 0
+		jr $ra
+	failure_part_4:
+		li $v0, -1
+		jr $ra
 
 ### Part V ###
 most_damaged:
