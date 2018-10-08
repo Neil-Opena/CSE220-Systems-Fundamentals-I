@@ -12,7 +12,7 @@
 .text
 
 print_car:
-	# $a0 --> address of car to print
+	# $a0 --> address of car name to print
 	#prints vin number 
 	li $v0, 4 
 	syscall
@@ -47,34 +47,29 @@ index_of_car:
 	blt $a3, 1885, index_of_car_error #year < 1885
 
 	# traverse the array by 16 bytes
-	move $t0, $a2 # t0 = index of car
-	# get starting index and multiply by 16 --> then add that number to t0
+	move $t0, $a2 # t0 = index of car (to return later)
 
-	sll $a2, $a2, 4
-
+	# t1 = used to hold current byte address
 	move $t1, $a0  # add starting address
-	add $t1, $t1, $a2, # add modified index
+
+	# t2 = used to get starting index and multiply by 16 to 'skip' previous indices
+	move $t2, $a2 
+	sll $t2, $t2, 4 # multiply by 16 bytes (the starting index)
+	add $t1, $t1, $t2 
 
 	addi $t1, $t1, 12 # add 4 for vin, 4 for make, 4 for model, but only load 2
-	li $t2, 0 # t2 = year
+
+	# changed t2 to hold the year
+	li $t2, 0 
 
 	traverse:
 		bge $t0, $a1, index_of_car_error # not found car with given year
-
-		# Testing: What I used to print out the VIN 
-			# addi $sp, $sp, -4
-			# sw $ra, 0($sp)
-			# lw $a0, ($t1)
-			# jal print_car
-			# lw $ra, 0($sp)
-			# addi $sp, $sp, 4
-
-			#What I used to 
+		# current index NOT greater than length:
 
 		lhu $t2, ($t1)
 		beq $t2, $a3, found_index
 
-		addi $t1, $t1, 16
+		addi $t1, $t1, 16 #add 16 bytes --> go to the next car's 
 		addi $t0, $t0, 1
 		j traverse
 	
