@@ -5,8 +5,8 @@ nl: .asciiz "\n"
 strcmp_output: .asciiz "strcmp output: "
 
 #Test 1 --> expected return value = -3
-str1: .asciiz "ABCD"
-str2: .asciiz "ABA"
+# str1: .asciiz "ABCD"
+# str2: .asciiz "ABCGG"
 
 #Test 2 --> expected return value = 14
 # str1: .asciiz "WHOOP!"
@@ -45,8 +45,8 @@ str2: .asciiz "ABA"
 # str2: .asciiz "WOLFIE"
 
 #Test 11 --> expected return value = 66
-# str1: .asciiz "StonyBrook"
-# str2: .asciiz "Stony"
+str1: .asciiz "StonyBrook"
+str2: .asciiz "Stony"
 
 .text
 .globl main

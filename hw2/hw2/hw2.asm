@@ -35,16 +35,16 @@ index_of_car:
 
 	# length --> the length of the cars array (how many structs are stored in the array)
 	# $a1 = length of cars array
-	ble $a1, 0, index_of_car_error #length less <= to 0
+	ble $a1, 0, index_of_car_error_part_1 #length less <= to 0
 
 	# start_index --> the index at which to start the search
 	# $a2 = start_index
-	blt $a2, 0, index_of_car_error #start index < 0
-	bge $a2, $a1, index_of_car_error #start index >= length
+	blt $a2, 0, index_of_car_error_part_1 #start index < 0
+	bge $a2, $a1, index_of_car_error_part_1 #start index >= length
 
 	# year --> the year of manufacture
 	# $a3 = year
-	blt $a3, 1885, index_of_car_error #year < 1885
+	blt $a3, 1885, index_of_car_error_part_1 #year < 1885
 
 	# traverse the array by 16 bytes
 	move $t0, $a2 # t0 = index of car (to return later)
@@ -62,34 +62,92 @@ index_of_car:
 	# changed t2 to hold the year
 	li $t2, 0 
 
-	traverse:
-		bge $t0, $a1, index_of_car_error # not found car with given year
+	traverse_part_1:
+		bge $t0, $a1, index_of_car_error_part_1 # not found car with given year
 		# current index NOT greater than length:
 
 		lhu $t2, ($t1)
-		beq $t2, $a3, found_index
+		beq $t2, $a3, found_index_part_1
 
 		addi $t1, $t1, 16 #add 16 bytes --> go to the next car's year
 		addi $t0, $t0, 1
-		j traverse
+		j traverse_part_1
 	
-	found_index:
+	found_index_part_1:
 		# v0 --> the index of the located car
 		move $v0, $t0
 		jr $ra
 
-	index_of_car_error:
+	index_of_car_error_part_1:
 		li $v0, -1
 		jr $ra
 	
 
 ### Part II ###
 strcmp:
-	li $v0, -200
-	li $v1, -200
 
-	jr $ra
+	# a0 = pointer to the first string
+	# a1 = pointer to the second string
 
+	move $t0, $a0 # t0 = points to current string 1 byte address
+	lbu $t1, ($t0)  # t1 = current string 1 byte
+
+	move $t2, $a1 # t2 = points to current string 2 byte address
+	lbu $t3, ($t2) # t3 - current string 2 byte
+
+	li $t4, 0 # t4 = difference (to return later)
+
+	beqz $t1, str1_empty_part2
+	beqz $t3, str2_empty_part2
+
+	# loop through both strings, if one reaches the null terminator, then don't continue to traverse
+	traverse_part_2:
+		beqz $t1, substr1_check_part2
+		beqz $t3, substr2_check_part2
+
+		sub $t4, $t1, $t3 # str1[i] - str2[j]
+		bne $t4, $0, done_part_2
+
+		addi $t0, $t0, 1 # move on to next character address
+		lbu $t1, ($t0)
+
+		addi $t2, $t2, 1 # move on to next character address
+		lbu $t3, ($t2)
+		j traverse_part_2
+
+		substr1_check_part2:
+			beqz $t3, done_part_2
+			sub $t4, $0, $t3
+			j done_part_2
+		
+		substr2_check_part2:
+			beqz $t1, done_part_2
+			sub $t4, $t1, $0
+			j done_part_2
+
+	str1_empty_part2:
+		# traverse string 2, add -1 to t4 per character
+		beqz $t3, done_part_2
+
+		addi $t4, $t4, -1
+		addi $t2, $t2, 1
+		lbu $t3, ($t2)
+		j str1_empty_part2
+
+	str2_empty_part2:
+		# traverse string 1, add 1 to t4 per character
+		beqz $t1, done_part_2
+
+		addi $t4, $t4, 1
+		addi $t0, $t0, 1
+		lbu $t1, ($t0)
+		j str2_empty_part2
+
+	done_part_2:
+		move $v0, $t4
+		jr $ra
+
+	# return in v0 the difference in ASCII value
 
 ### Part III ###
 memcpy:
