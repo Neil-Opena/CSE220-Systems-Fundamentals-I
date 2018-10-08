@@ -198,7 +198,54 @@ insert_car:
 	blt $a3, $0, failure_part_4 # index < 0
 	bgt $a3, $a1, failure_part_4 # index > length
 
+	# s0 = index of cars (starting at last) 
+	move $s0, $a1
+	addi $s0, $s0, -1
+	sll $s0, $s0, 4 # multiply by 16
+	add $s0, $s0, $a0 # add base address
 
+	# s1 = index to insert
+	move $s1, $a3
+	sll $s1, $s1, 4
+	add $s1, $s1, $a0
+	addi $s1, $s1, -16 # subtract 16, so that car at index gets moved too
+
+	# s2 = pointer to new car to insert
+	move $s2, $a2
+
+	# need to preserve $ra
+	addi $sp, $sp, -4
+	sw $ra, ($sp)
+
+	# [0,1,2,3,4]
+
+	# insert at index 3
+	# length = 5, start moving at index 4
+
+	move_cars_part_4:
+		beq $s1, $s0, insert_at_index_part_4
+
+		move $t0, $s0 
+		addi $t0, $t0, 16 # t0 = index to move current car to
+
+		move $a0, $s0
+		move $a1, $t0
+		li $a2, 16
+		jal memcpy
+
+		addi $s0, $s0, -16
+		j move_cars_part_4
+
+	insert_at_index_part_4:
+		move $a0, $s2
+		addi $s1, $s1, 16
+		move $a1, $s1
+		li $a2, 16
+		jal memcpy
+
+	# get $ra back
+	lw $ra, ($sp)
+	addi $sp, $sp, 4
 
 	success_part_4:
 		li $v0, 0

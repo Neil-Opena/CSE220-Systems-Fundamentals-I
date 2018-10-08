@@ -82,6 +82,8 @@ car_05_year: .byte 150, 7
 car_05_features: .byte 10
 .byte 0
 
+.space 64  # some extra memory set aside to make room for insertions
+
 .align 2
 all_repairs:
 repair_00_car: .word car_01
@@ -133,5 +135,3 @@ repair_09_car: .word car_05
 repair_09_desc_addr: .word repair_desc_C
 repair_09_cost: .byte 42, 1
 .byte 0, 0
-
-.space 64  # some extra memory set aside to make room for insertions

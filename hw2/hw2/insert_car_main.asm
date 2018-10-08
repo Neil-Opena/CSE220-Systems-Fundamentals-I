@@ -69,9 +69,25 @@ la $a0, insert_car_output
 li $v0, 4
 syscall
 la $a0, all_cars
-li $a1, 6 
 la $a2, test_car 
-li $a3, 3 
+# Test 1 --> expected return value = 0
+# li $a1, 6 
+# li $a3, 3
+# Test 2 --> expected return value = 0
+# li $a1, 6 
+# li $a3, 0
+# Test 3 --> expected return value = 0
+# li $a1, 6 
+# li $a3, 6
+# Test 4 --> expected return value = -1
+# li $a1, -1
+# li $a3, 3
+# Test 5 --> expected return value = -1
+# li $a1, 6 
+# li $a3, -1
+# Test 6 --> expected return value = -1
+li $a1, 6 
+li $a3, 8
 jal insert_car
 move $a0, $v0
 li $v0, 1
@@ -80,31 +96,31 @@ la $a0, nl
 li $v0, 4
 syscall
 
-# comparing contents
-li $s0, 0
-la $s1, all_cars
-la $s2, expected_all_cars
-loop_all_cars:
-    bge $s0, 6, done_test
+# # comparing contents
+# li $s0, 0
+# la $s1, all_cars
+# la $s2, expected_all_cars
+# loop_all_cars:
+#     bge $s0, 6, done_test
 
-    #get all_cars VIN
-    lw $a0, ($s1)
-    #get expected_cars VIN
-    lw $a1, ($s2)
+#     #get all_cars VIN
+#     lw $a0, ($s1)
+#     #get expected_cars VIN
+#     lw $a1, ($s2)
 
-    jal strcmp
-    move $a0, $v0
-    li $v0, 1
-    syscall
-    la $a0, nl
-    li $v0, 4
-    syscall
-    # output should be 0
+#     jal strcmp
+#     move $a0, $v0
+#     li $v0, 1
+#     syscall
+#     la $a0, nl
+#     li $v0, 4
+#     syscall
+#     # output should be 0
 
-    addi $s1, $s1, 16
-    addi $s2, $s2, 16
-    addi $s0, $s0, 1
-    j loop_all_cars
+#     addi $s1, $s1, 16
+#     addi $s2, $s2, 16
+#     addi $s0, $s0, 1
+#     j loop_all_cars
 
 done_test:
     li $v0, 10
