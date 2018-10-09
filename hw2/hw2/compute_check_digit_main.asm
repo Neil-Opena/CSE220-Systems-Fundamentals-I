@@ -18,7 +18,16 @@ main:
 la $a0, compute_check_digit_output
 li $v0, 4
 syscall
-la $a0, vin_test1
+# Test 1 --> expected return value = 0
+# la $a0, vin_test1
+# Test 2 --> expected return value = 5
+# la $a0, vin_test2
+# Test 3 --> expected return value = 9
+# la $a0, vin_test3
+# Test 4 --> expected return value = 3
+# la $a0, vin_test4
+# Test 5 --> expected return value = 5
+la $a0, vin_test5
 la $a1, map
 la $a2, weights
 la $a3, transliterate_str

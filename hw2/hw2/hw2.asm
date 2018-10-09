@@ -597,6 +597,8 @@ transliterate:
 
 	jr $ra
 
+	# works
+
 
 ### Optional function: not required for the assignment ###
 char_at:
@@ -644,14 +646,80 @@ compute_check_digit:
 	# a3 = transliterate string address
 
 	# save registers to stack
-	addi $sp, $sp, -4
-	sw $ra, 0($sp)
+	addi $sp, $sp, -32
+	sw $ra, 28($sp)
+	sw $s0, 24($sp)
+	sw $s1, 20($sp)
+	sw $s2, 16($sp)
+	sw $s3, 12($sp)
+	sw $s4, 8($sp)
+	sw $s5, 4($sp)
+	sw $s6, 0($sp) # s6 = used as a necessary register 'holder'
+
+	# move original arguments to s registers
+	move $s0, $a0 # s0 = VIN string address
+	move $s1, $a1 # s1 = map string address
+	move $s2, $a2 # s2 = weights string address
+	move $s3, $a3 # s3 = transliterate string address
+
+	# s4 = sum
+	# s5 = loop counter
+	li $s4, 0 # sum = 0
+	li $s5, 0 # i = 0
+	loop_part_8:
+		bge $s5, 17, done_part_8
+
+		# weights.charAt(i)
+		move $a0, $s2
+		move $a1, $s5
+		jal char_at
+		# map.indexOf( $v0 = weights.charAt(i) )
+		move $a0, $s1
+		move $a1, $v0
+		jal index_of
+
+		move $s6, $v0 # s6 = map.indexOf(weight.charAt(i))
+
+		#vin.charAt(i)
+		move $a0, $s0
+		move $a1, $s5
+		jal char_at
+		#transliterate( $v0 = vin.charAt(i), transliterate_str)
+		move $a0, $v0
+		move $a1, $s3
+		jal transliterate
+
+		mult $v0, $s6 # transliterate(vin.charAt(i), transliterate_str) * map.indexOf(weights.charAt(i))
+		mflo $s6 # s6 = result of multiplication
+
+		add $s4, $s4, $s6 # sum += result
+
+		addi $s5, $s5, 1 # increment i
+		j loop_part_8
+
+	done_part_8:
+
+	li $s5, 11
+	div $s4, $s5
+	# remainder in hi
+	mfhi $a1 # a1 = sum % 11
+	# map.charAt( $a1 = sum % 11)
+	move $a0, $s1
+	jal char_at
+
+	# result already in v0
 
 	# retrieve registers from stack
-	lw $ra, 0($sp)
-	addi $sp, $sp, 4
+	lw $s6, 0($sp)
+	lw $s5, 4($sp)
+	lw $s4, 8($sp)
+	lw $s3, 12($sp)
+	lw $s2, 16($sp)
+	lw $s1, 20($sp)
+	lw $s0, 24($sp)
+	lw $ra, 28($sp)
+	addi $sp, $sp, 32
 
-	li $v0, 0
 	jr $ra	
 
 #####################################################################
