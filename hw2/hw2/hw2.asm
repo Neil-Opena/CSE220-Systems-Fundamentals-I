@@ -256,10 +256,80 @@ insert_car:
 
 ### Part V ###
 most_damaged:
-	li $v0, -200
-	li $v1, -200
+
+	# a0 = array of car structs
+	# a1 = array of repair structs
+	# a2 = num elements in cars
+	# a3 = num elements in repairs
+
+	ble $a2, $0, error_case_part_5
+	ble $a3, $0, error_case_part_5
+
+	# go through cars
+
+	# save through stack 
+	addi $sp, $sp, -8
+	sw $s0, 4($sp)
+	sw $s1, 0($sp)
+
+	li $s0, 0 # car index to return
+	li $s1, 0 # cost to return
 	
-	jr $ra
+	move $t0, $a0
+	li $t1, 0 # car loop counter
+	loop_cars_part_5:
+		bge $t1, $a2, done_part_5 # done looping through cars
+
+		move $t2, $a1
+		li $t3, 0 # repair loop counter
+		li $t7, 0 # t7 = current car repair cost
+		loop_repairs_part_5:
+			bge $t3, $a3, continue_cars_part_5 # CONTINUE
+
+			# check if pointers are the same
+			lw $t4, ($t2) # t4 = address of car
+			bne $t4, $t0, diff_car_part_5
+
+			# same car pointer
+			addi $t5, $t2, 8 # go to cost
+			lhu $t6, ($t5) # load cost
+
+			add $t7, $t7, $t6 # add to current car cost
+
+			# go to next car
+			diff_car_part_5:
+				addi $t2, $t2, 12
+				addi $t3, $t3, 1
+				j loop_repairs_part_5
+		
+		continue_cars_part_5:
+		# check if current car repair cost is higher or not
+		ble $t7, $s1, not_max_part_5
+
+		# current car cost is higher than the max
+		move $s0, $t1
+		move $s1, $t7
+
+		not_max_part_5:
+			addi $t0, $t0, 16 # go to next car
+			addi $t1, $t1, 1
+			j loop_cars_part_5
+
+	done_part_5:
+		move $v0, $s0
+		move $v1, $s1
+
+		# reset stack
+		lw $s0, 4($sp)
+		lw $s1, 0($sp)
+		addi $sp, $sp, 8
+
+		jr $ra
+
+	error_case_part_5:
+		li $v0, -1
+		li $v1, -1
+		jr $ra
 
 
 ### Part VI ###
