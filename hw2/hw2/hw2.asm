@@ -11,22 +11,6 @@
 
 .text
 
-print_car:
-	# $a0 --> address of car name to print
-	#prints vin number 
-	li $v0, 4 
-	syscall
-	jr $ra
-
-print_year:
-	# $a0 --> year integer
-	li $v0, 1
-	syscall
-	li $a0, '\n'
-	li $v0, 11
-	syscall
-	jr $ra
-
 ### Part I ###
 index_of_car:
 	#the function takes the following arguments in order:
@@ -334,10 +318,155 @@ most_damaged:
 
 ### Part VI ###
 sort:
-	li $v0, -200
-	li $v1, -200
-	
-	jr $ra
+
+	# sorts by year
+
+	# def sort(cars):
+	# 	sorted = False
+	# 	while !sorted:
+	# 		sorted = True
+	# 		for(i = 1; i < cars.length - 1; i += 2):
+	# 			if cars[i] > cars[i + 1]:
+	# 				swap cars[i] and cars[i + 1]
+	# 				sorted = False
+	# 		for(i = 0; i < cars.length - 1; i += 2):
+	# 			if cars[i] > cars[i + 1]:
+	# 				swap cars[i] and cars[i + 1]
+	# 				sorted = False
+
+
+	# a0 = array of cars
+	# a1 = number of cars
+
+	# length <= 0
+	ble $a1, 0, error_case_part_6
+
+	# need to preserve 
+	addi $sp, $sp, -28
+	sw $ra, 24($sp)
+	sw $s0, 20($sp)
+	sw $s1, 16($sp)
+	sw $s2, 12($sp)
+	sw $s3, 8($sp)
+	sw $s4, 4($sp)
+	sw $s5, 0($sp)
+
+	move $s0, $a0 # s0 = array of cars
+	move $s1, $a1 # s1 = number of cars
+	addi $s1, $a1, -1
+
+	# since this function will be calling a functions, must use s variables to preserve, going through loops...
+
+	# s2 = used to hold cars[i] address
+	# s3 = used to hold cars[j] address
+	# s4 = used to store while condition
+	# s5 = used for loop counter
+
+	li $s4, 0 # s4 = sorted (0 = false, 1 = true)
+
+	li $a2, 16 # for memcpy --> copying 16 bytes
+	while_part_6:
+		beq $s4, 1, done_part_6
+		li $s4, 1 # sorted = true
+
+		move $s2, $s0 
+		addi $s2, $s2, 16 # s2 = cars[1]
+		li $s5, 1 # s5 = even loop counter
+			for_loop_even_part_6:
+				bge $s5, $s1, done_even_part_6
+
+				addi $s3, $s2, 16
+				# s2 = cars[i] 
+				# s3 = cars[i + 1] 
+				addi $t0, $s2, 12
+				addi $t1, $s3, 12
+				lhu $t2, ($t0)
+				lhu $t3, ($t1)
+				ble $t2, $t3, not_greater_even_part_6
+				# if cars[i] > cars[i + 1]
+
+				addi $sp, $sp, -16 # make space on stack
+
+				move $a0, $s2
+				move $a1, $sp
+				jal memcpy #memcpy(cars[i], $sp, 16)
+
+				move $a0, $s3
+				move $a1, $s2
+				jal memcpy #memcpy(cars[j], cars[i], 16)
+
+				move $a0, $sp
+				move $a1, $s3
+				jal memcpy #memcpy($sp, cars[j], 16)
+
+				addi $sp, $sp, 16
+
+				li $s4, 0 # sorted = false
+				not_greater_even_part_6:
+				addi $s2, $s2, 32 # i += 2
+				addi $s5, $s5, 2 # i += 2
+				j for_loop_even_part_6
+			done_even_part_6:
+
+		move $s2, $s0 # s2 = cars[0]
+		li $s5, 0 # s5 = odd loop counter
+			for_loop_odd_part_6:
+				bge $s5, $s1, done_odd_part_6
+
+				addi $s3, $s2, 16
+				# s2 = cars[i]
+				# s3 = cars[i + 1] 
+				addi $t0, $s2, 12
+				addi $t1, $s3, 12
+				lhu $t2, ($t0)
+				lhu $t3, ($t1)
+				ble $t2, $t3, not_greater_odd_part_6
+				# if cars[i] > cars[i + 1]
+
+				addi $sp, $sp, -16 # make space on stack
+
+				move $a0, $s2
+				move $a1, $sp
+				jal memcpy #memcpy(cars[i], $sp, 16)
+
+				move $a0, $s3
+				move $a1, $s2
+				jal memcpy #memcpy(cars[j], cars[i], 16)
+
+				move $a0, $sp
+				move $a1, $s3
+				jal memcpy #memcpy($sp, cars[j], 16)
+
+				addi $sp, $sp, 16
+
+				li $s4, 0 # sorted = false
+				not_greater_odd_part_6:
+				addi $s2, $s2, 32 # i += 2
+				addi $s5, $s5, 2 # i += 2
+				j for_loop_odd_part_6
+			done_odd_part_6:
+
+		j while_part_6
+
+	done_part_6:
+
+		# get registers back
+		lw $s5, 0($sp)
+		lw $s4, 4($sp)
+		lw $s3, 8($sp)
+		lw $s2, 12($sp)
+		lw $s1, 16($sp)
+		lw $s0, 20($sp)
+		lw $ra, 24($sp)
+		addi $sp, $sp, 28
+
+		li $v0, 0
+
+		jr $ra
+
+	error_case_part_6:
+		li $v0, -1
+		jr $ra
 
 
 ### Part VII ###
