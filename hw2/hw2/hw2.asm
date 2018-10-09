@@ -471,10 +471,118 @@ sort:
 
 ### Part VII ###
 most_popular_feature:
-	li $v0, -200
-	li $v1, -200
-	
-	jr $ra
+
+	# a0 = array of cars
+	# a1 = number of cars
+	# a2 = nibble (half byte) of features 
+
+	ble $a1, 0, error_case_part_7 # length <= 0
+	bgt $a2, 15, error_case_part_7 # not in range[1, 15]
+	blt $a2, 1, error_case_part_7 # not in range[1, 15]
+
+	# save registers to stack
+	addi $sp, $sp, -16
+	sw $s0, 12($sp)
+	sw $s1, 8($sp)
+	sw $s2, 4($sp)
+	sw $s3, 0($sp)
+
+	li $s0, 0 # counter for bit 0
+	li $s1, 0 # counter for bit 1
+	li $s2, 0 # counter for bit 2 
+	li $s3, 0 # counter for bit 3
+
+	# traverse cars
+	li $t2, 0 # loop counter
+	addi $t3, $a0, 14 # t7 = to access cars, point to features byte
+	traverse_part_7:
+		bge $t2, $a1, check_nibble_part_7
+
+		lbu $t4, ($t3) # t4 = hold feature of current car
+
+		andi $t4, $t4, 0x0000000F
+		blt $t4, 8, done_gps_part_7
+		#greater than or equal to 8 --> had bit position 3 set
+		addi $s3, $s3, 1 # s3 += 1
+
+		done_gps_part_7:
+		andi $t4, $t4, 0x00000007
+		blt $t4, 4, done_tinted_part_7
+		# greater than or equal to 4 --> had bit position 2 set
+		addi $s2, $s2, 1 # s2 += 1
+
+		done_tinted_part_7:
+		andi $t4, $t4, 0x00000003
+		blt $t4, 2, done_hybrids_part_7
+		# greater than or equal to 2 --> had bit position 1 set
+		addi $s1, $s1, 1 # s1 += 1
+
+		done_hybrids_part_7:
+		andi $t4, $t4, 0x00000001
+		blt $t4, 1, done_convertibles_part_7
+		# greater than or equal to 1 --> had bit position 0 set
+		addi $s0, $s0, 1 # s0 += 1
+
+		done_convertibles_part_7:
+		addi $t3, $t3, 16
+		addi $t2, $t2, 1
+		j traverse_part_7
+
+	# increment counters for each feature
+
+	check_nibble_part_7:
+		# check nibble a2
+
+		li $t0, -1
+		li $t1, -1
+
+		andi $t2, $a2, 0x00000008
+		beqz $t2, checked_gps_part_7
+		move $t0, $s3 # max = GPS count
+		li $t1, 8 # feature = GPS
+
+		checked_gps_part_7:
+		# check windows
+		andi $t2, $a2, 0x00000004
+		beqz $t2, checked_windows_part_7
+		ble $s2, $t0, checked_windows_part_7
+		# windows greater than GPS
+		move $t0, $s2
+		li $t1, 4
+
+		checked_windows_part_7:
+		# check hybrids
+		andi $t2, $a2, 0x00000002
+		beqz $t2, checked_hybrids_part_7
+		ble $s1, $t0, checked_hybrids_part_7
+		# hybrids greater than windows
+		move $t0, $s1
+		li $t1, 2
+
+		checked_hybrids_part_7:
+		# check convertibles
+		andi $t2, $a2, 0x00000001
+		beqz $t2, done_part_7
+		ble $s0, $t0, done_part_7
+		# convertibles greater than hybrids
+		move $t0, $s0
+		li $t1, 1
+
+	done_part_7:
+		move $v0, $t1
+
+		# retrieve registers from stack
+		lw $s3, 0($sp)
+		lw $s2, 4($sp)
+		lw $s1, 8($sp)
+		lw $s0, 12($sp)
+		addi $sp, $sp, 16
+
+		jr $ra
+
+	error_case_part_7:
+		li $v0, -1
+		jr $ra
 	
 
 ### Optional function: not required for the assignment ###
