@@ -321,20 +321,6 @@ sort:
 
 	# sorts by year
 
-	# def sort(cars):
-	# 	sorted = False
-	# 	while !sorted:
-	# 		sorted = True
-	# 		for(i = 1; i < cars.length - 1; i += 2):
-	# 			if cars[i] > cars[i + 1]:
-	# 				swap cars[i] and cars[i + 1]
-	# 				sorted = False
-	# 		for(i = 0; i < cars.length - 1; i += 2):
-	# 			if cars[i] > cars[i + 1]:
-	# 				swap cars[i] and cars[i + 1]
-	# 				sorted = False
-
-
 	# a0 = array of cars
 	# a1 = number of cars
 
@@ -595,25 +581,59 @@ transliterate:
 
 ### Optional function: not required for the assignment ###
 char_at:
-	li $v0, -200
-	li $v1, -200
-
+	# a0 = string address
+	# a1 = index
+	add $t0, $a0, $a1
+	lbu $v0, ($t0) # returns v0 = character
 	jr $ra
+
+	# works
 
 
 ### Optional function: not required for the assignment ###
 index_of:
-	li $v0, -200
-	li $v1, -200
+	# a0 = string address
+	# a1 = character
+
+	li $t0, 0
+	move $t1, $a0
+	traverse_index_of:
+		lbu $t2, ($t1)
+		beqz $t2, not_found_index_of
+		beq $t2, $a1, found_index_of
+		addi $t0, $t0, 1 # increase index
+		addi $t1, $t1, 1 # go to next character
+		j traverse_index_of
+
+	found_index_of:
+		move $v0, $t0
+		jr $ra
 		
-	jr $ra
+	not_found_index_of:
+		li $v0, -1
+		jr $ra
+
+	# works
 
 
 ### Part VIII ###
 compute_check_digit:
-	li $v0, -200
-	li $v1, -200
 	
+	# a0 = VIN string address
+	# a1 = map string address
+	# a2 = weights string address
+	# a3 = transliterate string address
+
+	# save registers to stack
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+
+
+	# retrieve registers from stack
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+
+	li $v0, 0
 	jr $ra	
 
 #####################################################################

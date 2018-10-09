@@ -24,7 +24,7 @@ la $a2, weights
 la $a3, transliterate_str
 jal compute_check_digit
 move $a0, $v0
-li $v0, 1
+li $v0, 11
 syscall
 la $a0, nl
 li $v0, 4
