@@ -573,9 +573,28 @@ most_popular_feature:
 
 ### Optional function: not required for the assignment ###
 transliterate:
-	li $v0, -200
-	li $v1, -200
-	
+# 	def transliterate(ch, transliterate_str):
+# 		return transliterate_str.index_of(ch) % 10
+
+	# a0 = character
+	# a1 = transliterate string address
+
+	# need to save ra
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+
+	move $t0, $a0
+	move $a0, $a1 # a0 = string
+	move $a1, $t0 # a1 = character
+	jal index_of
+	li $t0, 10
+	div $v0, $t0 # transliterate__str.index_of(ch) / 10
+	# remainder in hi
+	mfhi $v0
+
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+
 	jr $ra
 
 
@@ -627,7 +646,6 @@ compute_check_digit:
 	# save registers to stack
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
-
 
 	# retrieve registers from stack
 	lw $ra, 0($sp)
