@@ -19,13 +19,53 @@ la $a0, compute_check_digit_output
 li $v0, 4
 syscall
 # Test 1 --> expected return value = 0
-# la $a0, vin_test1
+la $a0, vin_test1
+la $a1, map
+la $a2, weights
+la $a3, transliterate_str
+jal compute_check_digit
+move $a0, $v0
+li $v0, 11
+syscall
+la $a0, nl
+li $v0, 4
+syscall
 # Test 2 --> expected return value = 5
-# la $a0, vin_test2
+la $a0, vin_test2
+la $a1, map
+la $a2, weights
+la $a3, transliterate_str
+jal compute_check_digit
+move $a0, $v0
+li $v0, 11
+syscall
+la $a0, nl
+li $v0, 4
+syscall
 # Test 3 --> expected return value = 9
-# la $a0, vin_test3
+la $a0, vin_test3
+la $a1, map
+la $a2, weights
+la $a3, transliterate_str
+jal compute_check_digit
+move $a0, $v0
+li $v0, 11
+syscall
+la $a0, nl
+li $v0, 4
+syscall
 # Test 4 --> expected return value = 3
-# la $a0, vin_test4
+la $a0, vin_test4
+la $a1, map
+la $a2, weights
+la $a3, transliterate_str
+jal compute_check_digit
+move $a0, $v0
+li $v0, 11
+syscall
+la $a0, nl
+li $v0, 4
+syscall
 # Test 5 --> expected return value = 5
 la $a0, vin_test5
 la $a1, map
