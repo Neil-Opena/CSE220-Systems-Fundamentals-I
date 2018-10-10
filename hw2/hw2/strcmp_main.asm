@@ -5,48 +5,56 @@ nl: .asciiz "\n"
 strcmp_output: .asciiz "strcmp output: "
 
 #Test 1 --> expected return value = -3
-# str1: .asciiz "ABCD"
-# str2: .asciiz "ABCGG"
+str1: .asciiz "ABCD"
+str2: .asciiz "ABCGG"
 
 #Test 2 --> expected return value = 14
-# str1: .asciiz "WHOOP!"
-# str2: .asciiz "WHOA"
+str3: .asciiz "WHOOP!"
+str4: .asciiz "WHOA"
 
 #Test 3 --> expected return value = -39
-# str1: .asciiz "Intel"
-# str2: .asciiz "pentium"
+str5: .asciiz "Intel"
+str6: .asciiz "pentium"
 
 #Test 4 --> expected return value = 17
-# str1: .asciiz "STONY"
-# str2: .asciiz "BROOK"
+str7: .asciiz "STONY"
+str8: .asciiz "BROOK"
 
 #Test 5 --> expected return value = -5
-# str1: .asciiz ""
-# str2: .asciiz "mouse"
+str9: .asciiz ""
+str10: .asciiz "mouse"
 
 #Test 6 --> expected return value = 10
-# str1: .asciiz "lonely_guy"
-# str2: .asciiz ""
+str11: .asciiz "lonely_guy"
+str12: .asciiz ""
 
 #Test 7 --> expected return value = 0
-# str1: .asciiz "Wolfie"
-# str2: .asciiz "Wolfie"
+str13: .asciiz "Wolfie"
+str14: .asciiz "Wolfie"
 
 #Test 8 --> expected return value = 0
-# str1: .asciiz ""
-# str2: .asciiz ""
+str15: .asciiz ""
+str16: .asciiz ""
 
 #Test 9 --> expected return value = 14
-# str1: .asciiz "happy"
-# str2: .asciiz "Z"
+str17: .asciiz "happy"
+str18: .asciiz "Z"
 
 #Test 10 --> expected return value = -73
-# str1: .asciiz "WOLF"
-# str2: .asciiz "WOLFIE"
+str19: .asciiz "WOLF"
+str20: .asciiz "WOLFIE"
 
 #Test 11 --> expected return value = 66
-str1: .asciiz "StonyBrook"
-str2: .asciiz "Stony"
+str21: .asciiz "StonyBrook"
+str22: .asciiz "Stony"
+
+#Test 12 --> expected return value = 1
+str23: .asciiz "1"
+str24: .asciiz "0"
+
+#Test 13 --> expected return value = -1
+str25: .asciiz "0"
+str26: .asciiz "1"
 
 .text
 .globl main
@@ -63,5 +71,126 @@ syscall
 la $a0, nl
 li $v0, 4
 syscall
+
+la $a0, str3
+la $a1, str4
+jal strcmp
+move $a0, $v0
+li $v0, 1
+syscall
+la $a0, nl
+li $v0, 4
+syscall
+
+la $a0, str5
+la $a1, str6
+jal strcmp
+move $a0, $v0
+li $v0, 1
+syscall
+la $a0, nl
+li $v0, 4
+syscall
+
+la $a0, str7
+la $a1, str8
+jal strcmp
+move $a0, $v0
+li $v0, 1
+syscall
+la $a0, nl
+li $v0, 4
+syscall
+
+la $a0, str9
+la $a1, str10
+jal strcmp
+move $a0, $v0
+li $v0, 1
+syscall
+la $a0, nl
+li $v0, 4
+syscall
+
+la $a0, str11
+la $a1, str12
+jal strcmp
+move $a0, $v0
+li $v0, 1
+syscall
+la $a0, nl
+li $v0, 4
+syscall
+
+la $a0, str13
+la $a1, str14
+jal strcmp
+move $a0, $v0
+li $v0, 1
+syscall
+la $a0, nl
+li $v0, 4
+syscall
+
+la $a0, str15
+la $a1, str16
+jal strcmp
+move $a0, $v0
+li $v0, 1
+syscall
+la $a0, nl
+li $v0, 4
+syscall
+
+la $a0, str17
+la $a1, str18
+jal strcmp
+move $a0, $v0
+li $v0, 1
+syscall
+la $a0, nl
+li $v0, 4
+syscall
+
+la $a0, str19
+la $a1, str20
+jal strcmp
+move $a0, $v0
+li $v0, 1
+syscall
+la $a0, nl
+li $v0, 4
+syscall
+
+la $a0, str21
+la $a1, str22
+jal strcmp
+move $a0, $v0
+li $v0, 1
+syscall
+la $a0, nl
+li $v0, 4
+syscall
+
+la $a0, str23
+la $a1, str24
+jal strcmp
+move $a0, $v0
+li $v0, 1
+syscall
+la $a0, nl
+li $v0, 4
+syscall
+
+la $a0, str25
+la $a1, str26
+jal strcmp
+move $a0, $v0
+li $v0, 1
+syscall
+la $a0, nl
+li $v0, 4
+syscall
+
 li $v0, 10
 syscall
