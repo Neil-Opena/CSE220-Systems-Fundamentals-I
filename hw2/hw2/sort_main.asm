@@ -37,6 +37,7 @@ syscall
 # done_before:
 la $a0, all_cars
 li $a1, 12
+# li $a1, -1
 jal sort
 move $a0, $v0
 li $v0, 1
