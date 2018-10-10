@@ -13,12 +13,25 @@ test_car: .word test_vin
 
 .align 2
 expected_all_cars: 
+
+# .word test_vin
+# .word make_A
+# .word model_D
+# .byte 255, 255
+# .byte 12, 0
+
 .word vin_00
 .word make_A
 .word model_A
 .byte 110, 7
 .byte 8
 .byte 0
+
+# .word test_vin
+# .word make_A
+# .word model_D
+# .byte 255, 255
+# .byte 12, 0
 
 .word vin_01
 .word make_D
@@ -27,6 +40,12 @@ expected_all_cars:
 .byte 8
 .byte 0
 
+# .word test_vin
+# .word make_A
+# .word model_D
+# .byte 255, 255
+# .byte 12, 0
+
 .word vin_02
 .word make_A
 .word model_C
@@ -34,11 +53,11 @@ expected_all_cars:
 .byte 12
 .byte 0
 
-.word test_vin
-.word make_A
-.word model_D
-.byte 255, 255
-.byte 12, 0
+# .word test_vin
+# .word make_A
+# .word model_D
+# .byte 255, 255
+# .byte 12, 0
 
 .word vin_03
 .word make_E
@@ -47,12 +66,24 @@ expected_all_cars:
 .byte 10
 .byte 0
 
+# .word test_vin
+# .word make_A
+# .word model_D
+# .byte 255, 255
+# .byte 12, 0
+
 .word vin_04
 .word make_A
 .word model_E
 .byte 122, 7
 .byte 5
 .byte 0
+
+.word test_vin
+.word make_A
+.word model_D
+.byte 255, 255
+.byte 12, 0
 
 .word vin_05
 .word make_C
@@ -61,6 +92,12 @@ expected_all_cars:
 .byte 10
 .byte 0
 
+# .word test_vin
+# .word make_A
+# .word model_D
+# .byte 255, 255
+# .byte 12, 0
+
 .text
 .globl main
 
@@ -68,26 +105,47 @@ main:
 la $a0, insert_car_output
 li $v0, 4
 syscall
-la $a0, all_cars
-la $a2, test_car 
 # Test 1 --> expected return value = 0
+# la $a0, all_cars
+# la $a2, test_car 
 # li $a1, 6 
 # li $a3, 3
-# Test 2 --> expected return value = 0
+# jal insert_car
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# la $a0, nl
+# li $v0, 4
+# syscall
+# # Test 2 --> expected return value = 0
+# la $a0, all_cars
+# la $a2, test_car 
 # li $a1, 6 
 # li $a3, 0
-# Test 3 --> expected return value = 0
+# jal insert_car
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# la $a0, nl
+# li $v0, 4
+# syscall
+# # Test 3 --> expected return value = 0
+# la $a0, all_cars
+# la $a2, test_car 
 # li $a1, 6 
 # li $a3, 6
-# Test 4 --> expected return value = -1
-# li $a1, -1
-# li $a3, 3
-# Test 5 --> expected return value = -1
-# li $a1, 6 
-# li $a3, -1
-# Test 6 --> expected return value = -1
-li $a1, 6 
-li $a3, 8
+# jal insert_car
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# la $a0, nl
+# li $v0, 4
+# syscall
+# # Test 4 --> expected return value = -1
+la $a0, all_cars
+la $a2, test_car 
+li $a1, -1
+li $a3, 3
 jal insert_car
 move $a0, $v0
 li $v0, 1
@@ -95,6 +153,66 @@ syscall
 la $a0, nl
 li $v0, 4
 syscall
+# # Test 5 --> expected return value = -1
+# la $a0, all_cars
+# la $a2, test_car 
+# li $a1, 6 
+# li $a3, -1
+# jal insert_car
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# la $a0, nl
+# li $v0, 4
+# syscall
+# # Test 6 --> expected return value = -1
+# la $a0, all_cars
+# la $a2, test_car 
+# li $a1, 6 
+# li $a3, 8
+# jal insert_car
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# la $a0, nl
+# li $v0, 4
+# syscall
+# # Test 7 --> expected return value = -1
+# la $a0, all_cars
+# la $a2, test_car 
+# li $a1, 0 # index > length
+# li $a3, 1
+# jal insert_car
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# la $a0, nl
+# li $v0, 4
+# syscall
+# # Test 8 --> expected return value = -1
+# la $a0, all_cars
+# la $a2, test_car 
+# li $a1, -1
+# li $a3, -1 # index < 0
+# jal insert_car
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# la $a0, nl
+# li $v0, 4
+# syscall
+# # Test 9 --> expected return value = 0
+# la $a0, all_cars
+# la $a2, test_car 
+# li $a1, 6 
+# li $a3, 5
+# jal insert_car
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# la $a0, nl
+# li $v0, 4
+# syscall
 
 # # comparing contents
 # li $s0, 0
