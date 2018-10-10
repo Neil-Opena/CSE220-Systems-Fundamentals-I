@@ -484,38 +484,39 @@ most_popular_feature:
 
 	# traverse cars
 	li $t2, 0 # loop counter
-	addi $t3, $a0, 14 # t7 = to access cars, point to features byte
+	addi $t3, $a0, 14 # t3 = to access cars, point to features byte
 	traverse_part_7:
 		bge $t2, $a1, check_nibble_part_7
 
 		lbu $t4, ($t3) # t4 = hold feature of current car
 
-		andi $t4, $t4, 0x0000000F
-		blt $t4, 8, done_gps_part_7
+		# t5 = result of or operation
+		andi $t5, $t4, 0x00000008
+		beqz $t5, done_gps_part_7
 		#greater than or equal to 8 --> had bit position 3 set
 		addi $s3, $s3, 1 # s3 += 1
 
 		done_gps_part_7:
-		andi $t4, $t4, 0x00000007
-		blt $t4, 4, done_tinted_part_7
+		andi $t5, $t4, 0x00000004
+		beqz $t5, done_tinted_part_7
 		# greater than or equal to 4 --> had bit position 2 set
 		addi $s2, $s2, 1 # s2 += 1
 
 		done_tinted_part_7:
-		andi $t4, $t4, 0x00000003
-		blt $t4, 2, done_hybrids_part_7
+		andi $t5, $t4, 0x00000002
+		beqz $t5, done_hybrids_part_7
 		# greater than or equal to 2 --> had bit position 1 set
 		addi $s1, $s1, 1 # s1 += 1
 
 		done_hybrids_part_7:
-		andi $t4, $t4, 0x00000001
-		blt $t4, 1, done_convertibles_part_7
+		andi $t5, $t4, 0x00000001
+		beqz $t5, done_convertibles_part_7
 		# greater than or equal to 1 --> had bit position 0 set
 		addi $s0, $s0, 1 # s0 += 1
 
 		done_convertibles_part_7:
-		addi $t3, $t3, 16
-		addi $t2, $t2, 1
+		addi $t3, $t3, 16 # go to next car
+		addi $t2, $t2, 1 # increase counter
 		j traverse_part_7
 
 	# increment counters for each feature
@@ -527,14 +528,15 @@ most_popular_feature:
 		li $t1, -1
 
 		andi $t2, $a2, 0x00000008
-		beqz $t2, checked_gps_part_7
+		beqz $t2, checked_gps_part_7 # check if nibble has bit position 3 set
 		move $t0, $s3 # max = GPS count
 		li $t1, 8 # feature = GPS
 
 		checked_gps_part_7:
 		# check windows
 		andi $t2, $a2, 0x00000004
-		beqz $t2, checked_windows_part_7
+		beqz $t2, checked_windows_part_7 # check if nibble has bit position 2 set
+		beqz $s2, checked_windows_part_7# check if count == 0
 		ble $s2, $t0, checked_windows_part_7
 		# windows greater than GPS
 		move $t0, $s2
@@ -543,7 +545,8 @@ most_popular_feature:
 		checked_windows_part_7:
 		# check hybrids
 		andi $t2, $a2, 0x00000002
-		beqz $t2, checked_hybrids_part_7
+		beqz $t2, checked_hybrids_part_7 # check if nibble has bit position 1 set
+		beqz $s1, checked_hybrids_part_7 # check if count == 0
 		ble $s1, $t0, checked_hybrids_part_7
 		# hybrids greater than windows
 		move $t0, $s1
@@ -552,7 +555,8 @@ most_popular_feature:
 		checked_hybrids_part_7:
 		# check convertibles
 		andi $t2, $a2, 0x00000001
-		beqz $t2, done_part_7
+		beqz $t2, done_part_7 # check if nibble has bit position 0 set
+		beqz $s0, done_part_7
 		ble $s0, $t0, done_part_7
 		# convertibles greater than hybrids
 		move $t0, $s0
