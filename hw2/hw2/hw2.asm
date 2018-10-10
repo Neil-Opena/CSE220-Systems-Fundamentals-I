@@ -182,6 +182,13 @@ insert_car:
 	blt $a3, $0, failure_part_4 # index < 0
 	bgt $a3, $a1, failure_part_4 # index > length
 
+	# preserve registers
+	addi $sp, $sp, -16
+	sw $ra, 12($sp)
+	sw $s0, 8($sp)
+	sw $s1, 4($sp)
+	sw $s2, 0($sp)
+
 	# s0 = index of cars (starting at last) 
 	move $s0, $a1
 	addi $s0, $s0, -1
@@ -196,12 +203,6 @@ insert_car:
 
 	# s2 = pointer to new car to insert
 	move $s2, $a2
-
-	# need to preserve $ra
-	addi $sp, $sp, -4
-	sw $ra, ($sp)
-
-	# [0,1,2,3,4]
 
 	# insert at index 3
 	# length = 5, start moving at index 4
@@ -227,13 +228,16 @@ insert_car:
 		li $a2, 16
 		jal memcpy
 
-	# get $ra back
-	lw $ra, ($sp)
-	addi $sp, $sp, 4
+	# retrieve registers
+	lw $s2, 0($sp)
+	lw $s1, 4($sp)
+	lw $s0, 8($sp)
+	lw $ra, 12($sp)
+	addi $sp, $sp, 16
 
-	success_part_4:
-		li $v0, 0
-		jr $ra
+	li $v0, 0
+	jr $ra
+
 	failure_part_4:
 		li $v0, -1
 		jr $ra
