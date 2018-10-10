@@ -89,49 +89,59 @@ all_repairs:
 repair_00_car: .word car_01
 repair_00_desc_addr: .word repair_desc_A
 repair_00_cost: .byte 223, 0
+# repair_00_cost: .byte 0, 0
 .byte 0, 0
 
 repair_01_car: .word car_04
 repair_01_desc_addr: .word repair_desc_G
 repair_01_cost: .byte 35, 0
+# repair_01_cost: .byte 0, 0
 .byte 0, 0
 
 repair_02_car: .word car_02
 repair_02_desc_addr: .word repair_desc_H
 repair_02_cost: .byte 52, 0
+# repair_02_cost: .byte 0, 0
 .byte 0, 0
 
 repair_03_car: .word car_00
 repair_03_desc_addr: .word repair_desc_C
 repair_03_cost: .byte 64, 0
+# repair_03_cost: .byte 0, 0
 .byte 0, 0
 
 repair_04_car: .word car_02
 repair_04_desc_addr: .word repair_desc_G
 repair_04_cost: .byte 244, 1
+# repair_04_cost: .byte 0, 0
 .byte 0, 0
 
 repair_05_car: .word car_03
 repair_05_desc_addr: .word repair_desc_A
 repair_05_cost: .byte 156, 1
+# repair_05_cost: .byte 0, 0
 .byte 0, 0
 
 repair_06_car: .word car_04
 repair_06_desc_addr: .word repair_desc_H
 repair_06_cost: .byte 105, 1
+# repair_06_cost: .byte 0, 0
 .byte 0, 0
 
 repair_07_car: .word car_00
 repair_07_desc_addr: .word repair_desc_G
 repair_07_cost: .byte 222, 1
+# repair_07_cost: .byte 0, 0
 .byte 0, 0
 
 repair_08_car: .word car_04
 repair_08_desc_addr: .word repair_desc_G
 repair_08_cost: .byte 191, 0
+# repair_08_cost: .byte 0, 0
 .byte 0, 0
 
 repair_09_car: .word car_05
 repair_09_desc_addr: .word repair_desc_C
 repair_09_cost: .byte 42, 1
+# repair_09_cost: .byte 0, 0
 .byte 0, 0
