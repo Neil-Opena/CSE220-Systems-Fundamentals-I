@@ -391,9 +391,99 @@ p6_done:
 
 # Part VII
 encrypt:
-li $v0, -200
-li $v1, -200
+# a0 = adfgvx grid address
+# a1 = plaintext string
+# a2 - keyword string
+# a3 - buffer for encrypted string
 
+addi $sp, $sp, -24
+sw $s0, 20($sp)
+sw $s1, 16($sp)
+sw $s2, 12($sp)
+sw $s3, 8($sp)
+sw $s4, 4($sp)
+sw $ra, 0($sp)
+
+move $s0, $a0
+move $s1, $a1
+move $s2, $a2
+move $s3, $a3
+# used s4 to hold variable count of heap_cipher_text
+
+# get length of string
+li $t0, 0 # counter for plaintext length
+move $t1, $s1 # string address 
+p7_loop_plaintext:
+    lbu $t2, ($t1)
+    beqz $t2, p7_start_loop_keyword
+    addi $t0, $t0, 1
+    addi $t1, $t1, 1 # go to next character
+    j p7_loop_plaintext
+
+p7_start_loop_keyword:
+    li $t3, 0 # counter for keyword length
+    move $t1, $s2 # string address
+p7_loop_keyword:
+    lbu $t2, ($t1)
+    beqz $t2, p7_sbrk
+    addi $t3, $t3, 1
+    addi $t1, $t1, 1 # go to next character
+    j p7_loop_keyword
+
+# t0 = length of plaintext
+# t1 = length of keyword
+p7_sbrk:    
+    move $t1, $t3
+    # 2* plaintext length
+    sll $t0, $t0, 0x1 
+    # (2 * plaintext length) / t1
+    div $t0, $t1
+    mfhi $t2 # t0 mod t1
+    mflo $t3 # t0 / t1
+    beqz $t2, p7_no_remainder
+    addi $t3, $t3, 1
+
+        p7_no_remainder:
+        mult $t3, $t1
+        mflo $s4
+        move $a0, $s4
+        li $v0, 9
+        syscall
+        
+move $t0, $v0 # t0 = heap address will be modified
+move $t4, $v0 # t4 = heap address
+move $t3, $s4 # t3 = count of heap
+li $t1, 0 # counter
+li $t2, '*'
+p7_fill_asterisks:
+    bge $t1, $t3, p7_map_plaintext
+    sb $t2, ($t0)
+
+    addi $t1, $t1, 1
+    addi $t0, $t0, 1
+    j p7_fill_asterisks
+
+p7_map_plaintext:
+    move $a0, $s0
+    move $a1, $s1
+    move $a2, $t4
+    jal map_plaintext
+
+    move $a0, $t4
+    li $v0, 4
+    syscall
+    li $a0, '\n'
+    li $v0, 11
+    syscall
+
+
+lw $ra, 0($sp)
+lw $s4, 4($sp)
+lw $s3, 8($sp)
+lw $s2, 12($sp)
+lw $s1, 16($sp)
+lw $s0, 20($sp)
+addi $sp, $sp, 24
 jr $ra
 
 # Part VIII
