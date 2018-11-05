@@ -44,6 +44,36 @@ p1_helper:
     p1_helper_done:
         jr $ra
 
+# Helper - Part V
+# swap indices in an array
+p5_helper:
+    # a0 = address of array
+    # a1 = index 1
+    # a2 = index 2
+    # a3 = elem size
+
+    mult $a1, $a3 # index1 * elem_size
+    mflo $t0
+    mult $a2, $a3 # index2 * elem_size
+    mflo $t1
+    add $t0, $t0, $a0 # index1 + address
+    add $t1, $t1, $a0 # index2 + address
+
+    bne $a3, 1, p5_helper_word
+    # elem_size == 1
+    lbu $t2, ($t0)
+    lbu $t3, ($t1)
+    sb $t2, ($t1)
+    sb $t3, ($t0)
+    jr $ra
+
+    p5_helper_word:
+    # elem_size == 4
+    lw $t2, ($t0)
+    lw $t3, ($t1)
+    sw $t2, ($t1)
+    sw $t3, ($t0)
+    jr $ra
 
 # Part I
 get_adfgvx_coords:
@@ -161,13 +191,13 @@ p3_done:
     # sb $0, ($s1) #add a null terminator
 
 
-lw $ra, 0($sp)
-lw $s2, 4($sp)
-lw $s1, 8($sp)
-lw $s0, 12($sp)
-addi $sp, $sp, 16
+    lw $ra, 0($sp)
+    lw $s2, 4($sp)
+    lw $s1, 8($sp)
+    lw $s0, 12($sp)
+    addi $sp, $sp, 16
 
-jr $ra
+    jr $ra
 
 # Part IV
 swap_matrix_columns:
@@ -215,10 +245,102 @@ p4_done:
 
 # Part V
 key_sort_matrix:
-li $v0, -200
-li $v1, -200
+# a0 = matrix address
+# a1 = num rows
+# a2 = num cols
+# a3 = address of array of items being sorted
+lbu $t0, 0($sp)
+# t0 = elem_size (1 or 4)
 
-jr $ra
+addi $sp, $sp, -36
+sw $s0, 32($sp)
+sw $s1, 28($sp)
+sw $s2, 24($sp)
+sw $s3, 20($sp)
+sw $s4, 16($sp)
+sw $s5, 12($sp)
+sw $s6, 8($sp)
+sw $s7, 4($sp)
+sw $ra, 0($sp)
+
+move $s0, $a0 # s0 = matrix address
+move $s1, $a1 # s1 = num rows
+move $s2, $a2 # s2 = num cols
+move $s3, $a3 # s3 = array address
+move $s4, $t0 # s4 = elem size
+# s5 = i
+# s6 = j
+li $s5, 0 # i = 0
+p5_traverse_i:
+    bge $s5, $s2, p5_done
+
+    addi $s7, $s2, -1 #s7 = (n - 1)
+    sub $s7, $s7, $s5 # s7 = (n - 1) - i
+    li $s6, 0
+    p5_traverse_j:
+        bge $s6, $s7, p5_done_j
+
+        mult $s6, $s4 # multiply j by elem_size
+        mflo $t0 # t0 = j * elem_size
+        add $t1, $t0, $s4 # t1 = (j * elem_size) + elem_size = (j + 1) * elem_size
+        add $t0, $t0, $s3 # add address to modified j
+        add $t1, $t1, $s3 # add address to modified j + 1
+
+        bne $s4, 1, p5_load_word  
+        # elem size == 1
+        lbu $t2, ($t0)
+        lbu $t3, ($t1)
+        j p5_check_swap
+
+        p5_load_word: 
+        # elem size == 4
+        lw $t2, ($t0)
+        lw $t3, ($t1)
+
+        p5_check_swap:
+        ble $t2, $t3, p5_continue_j # if(A[j] <= A[j + 1])
+        # (A[j] > A[j + 1])
+        move $a0, $s3 # array address
+        move $a1, $s6 # j
+        addi $t5, $s6, 1 # t5 = j + 1
+        move $a2, $t5
+        move $a3, $s4
+        jal p5_helper # swap key array
+
+        move $a0, $s0
+        move $a1, $s1
+        move $a2, $s2
+        move $a3, $s6
+        addi $sp, $sp, -4
+        addi $t4, $s6, 1 # j + 1 index
+        sw $t4, 0($sp)
+        jal swap_matrix_columns
+        addi $sp, $sp, 4
+
+        p5_continue_j:
+
+            addi $s6, $s6, 1
+            j p5_traverse_j
+
+    p5_done_j:
+        addi $s5, $s5, 1 # add 1 to the index
+        j p5_traverse_i
+
+# array length == num cols
+
+
+p5_done:
+    lw $ra, 0($sp)
+    lw $s7, 4($sp)
+    lw $s6, 8($sp)
+    lw $s5, 12($sp)
+    lw $s4, 16($sp)
+    lw $s3, 20($sp)
+    lw $s2, 24($sp)
+    lw $s1, 28($sp)
+    lw $s0, 32($sp)
+    addi $sp, $sp, 36
+    jr $ra
 
 # Part IV
 transpose:

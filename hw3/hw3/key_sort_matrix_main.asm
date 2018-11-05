@@ -23,6 +23,12 @@ syscall
 li $a0, '\n'
 li $v0, 11
 syscall
+la $a0, key1
+li $v0, 4
+syscall
+li $a0, '\n'
+li $v0, 11
+syscall
 
 la $a0, matrix2
 li $a1, 4
@@ -37,6 +43,29 @@ addi $sp, $sp, 4
 la $a0, matrix2
 li $v0, 4
 syscall
+li $a0, '\n'
+li $v0, 11
+syscall
+la $t2, key2
+# print numerical key
+li $t0, 0
+li $t3, 4
+print_numerical_key:
+    bge $t0, 5, done_print
+    mult $t0, $t3
+    mflo $t1
+    add $t1, $t1, $t2
+
+    lw $a0, ($t1)
+    li $v0, 1
+    syscall
+    li $a0, ' '
+    li $v0, 11
+    syscall
+    addi $t0, $t0, 1
+    j print_numerical_key
+
+done_print:
 li $a0, '\n'
 li $v0, 11
 syscall
