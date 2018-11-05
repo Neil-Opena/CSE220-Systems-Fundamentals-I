@@ -81,10 +81,37 @@ p1_done:
 
 # Part II
 search_adfgvx_grid:
-li $v0, -200
-li $v1, -200
+# a0 = char array address
+# a1 = character 2D index we want to find
 
-jr $ra
+# v0 = row index of the plain text character
+# v1 = col index of the plain text character
+
+move $t0, $a0
+lbu $t1, ($a0)
+p2_search_grid:
+    beqz $t1, p2_error_case
+    beq $t1, $a1, p2_found_char
+    addi $a0, $a0, 1
+    lbu $t1, ($a0)
+
+j p2_search_grid
+
+p2_found_char:
+    sub $t1, $a0, $t0
+    # t1 = index in the row major order array
+    li $t0, 6 # 6x6 array
+    div $t1, $t0 # index / 6
+    mflo $v0
+    mfhi $v1
+    j p2_done
+
+p2_error_case:
+    li $v0, -1
+    li $v1, -1
+
+p2_done:
+    jr $ra
 
 # Part III
 map_plaintext:
