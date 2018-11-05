@@ -67,7 +67,7 @@ move $a0, $v1
 syscall
 li $a0, '\n'
 syscall
-# (-1, -1) --> return 
+# (-1, -1) --> return  (-1, -1)
 li $a0, -1
 li $a1, -1
 jal get_adfgvx_coords
@@ -80,7 +80,7 @@ move $a0, $v1
 syscall
 li $a0, '\n'
 syscall
-# (0, 0) --> return
+# (0, 0) --> return ('A', 'A')
 li $a0, 0
 li $a1, 0
 jal get_adfgvx_coords
@@ -93,7 +93,7 @@ move $a0, $v1
 syscall
 li $a0, '\n'
 syscall
-# (-1, 0) --> return
+# (-1, 0) --> return (-1, -1)
 li $a0, -1
 li $a1, 0
 jal get_adfgvx_coords
