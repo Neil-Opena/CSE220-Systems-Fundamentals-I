@@ -597,10 +597,52 @@ p8_done:
 
 # Part IX
 string_sort:
-li $v0, -200
-li $v1, -200
+# a0 = string to sort
 
-jr $ra
+# get string length first
+li $t0, 0 # n = 0
+move $t1, $a0
+p9_traverse_string:
+    lbu $t2, ($t1)
+    beqz $t2, p9_start_loop_i
+    addi $t0, $t0, 1
+    addi $t1, $t1, 1
+    j p9_traverse_string
+
+p9_start_loop_i:
+li $t1, 0 # i = 0
+p9_loop_i:
+    bge $t1, $t0, p9_done
+
+    addi $t3, $t0, -1 # t3 = n - 1
+    sub $t3, $t3, $t1 # t3 = (n - 1) - i
+    li $t2, 0 # j = 0
+    p9_loop_j:
+        bge $t2, $t3, p9_continue_i
+
+        move $t4, $t2 # t4 = j
+        addi $t5, $t4, 1 # t5 = j + 1
+        add $t4, $t4, $a0 # add base address
+        add $t5, $t5, $a0 # add base address
+        lbu $t6, ($t4)
+        lbu $t7, ($t5)
+        # if A[j] <= A[j + 1]
+        ble $t6, $t7, p9_continue_j
+        # A[j] > A[j + 1]
+        # swap
+        sb $t6, ($t5)
+        sb $t7, ($t4)
+        
+        p9_continue_j:
+            addi $t2, $t2, 1
+            j p9_loop_j
+
+    p9_continue_i:
+    addi $t1, $t1, 1
+    j p9_loop_i
+
+p9_done:
+    jr $ra
 
 # Part X
 decrypt:
