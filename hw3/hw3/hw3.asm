@@ -188,12 +188,6 @@ p3_traverse_string:
     j  p3_traverse_string
 
 p3_done:
-    # sb $0, ($s1) #add a null terminator
-
-    # FIXME 
-    # FIXME
-    # FIXME
-
     lw $ra, 0($sp)
     lw $s2, 4($sp)
     lw $s1, 8($sp)
@@ -396,19 +390,23 @@ encrypt:
 # a2 - keyword string
 # a3 - buffer for encrypted string
 
-addi $sp, $sp, -24
-sw $s0, 20($sp)
-sw $s1, 16($sp)
-sw $s2, 12($sp)
-sw $s3, 8($sp)
-sw $s4, 4($sp)
+addi $sp, $sp, -32
+sw $s0, 28($sp)
+sw $s1, 24($sp)
+sw $s2, 20($sp)
+sw $s3, 16($sp)
+sw $s4, 12($sp)
+sw $s5, 8($sp)
+sw $s6, 4($sp)
 sw $ra, 0($sp)
 
 move $s0, $a0
 move $s1, $a1
 move $s2, $a2
 move $s3, $a3
-# used s4 to hold variable count of heap_cipher_text
+# used s4 to hold count of heap
+# used s5 t0 hold address of heap
+# used s6 to hoid keyword length
 
 # get length of string
 li $t0, 0 # counter for plaintext length
@@ -431,32 +429,31 @@ p7_loop_keyword:
     j p7_loop_keyword
 
 # t0 = length of plaintext
-# t1 = length of keyword
+# s6 = length of keyword
 p7_sbrk:    
-    move $t1, $t3
+    move $s6, $t3
     # 2* plaintext length
     sll $t0, $t0, 0x1 
     # (2 * plaintext length) / t1
-    div $t0, $t1
-    mfhi $t2 # t0 mod t1
-    mflo $t3 # t0 / t1
+    div $t0, $s6
+    mfhi $t2 # t0 mod s6
+    mflo $t3 # t0 / s6
     beqz $t2, p7_no_remainder
     addi $t3, $t3, 1
 
         p7_no_remainder:
-        mult $t3, $t1
+        mult $t3, $s6
         mflo $s4
         move $a0, $s4
         li $v0, 9
         syscall
         
 move $t0, $v0 # t0 = heap address will be modified
-move $t4, $v0 # t4 = heap address
-move $t3, $s4 # t3 = count of heap
+move $s5, $v0 # s5 = heap address
 li $t1, 0 # counter
 li $t2, '*'
 p7_fill_asterisks:
-    bge $t1, $t3, p7_map_plaintext
+    bge $t1, $s4, p7_map_plaintext
     sb $t2, ($t0)
 
     addi $t1, $t1, 1
@@ -466,24 +463,46 @@ p7_fill_asterisks:
 p7_map_plaintext:
     move $a0, $s0
     move $a1, $s1
-    move $a2, $t4
+    move $a2, $s5
     jal map_plaintext
 
-    move $a0, $t4
-    li $v0, 4
-    syscall
-    li $a0, '\n'
-    li $v0, 11
-    syscall
+p7_key_sort_matrix:
+    # keyword = sorting key
+    # s5 = address of heap
+    # num rows = heap size / keyword length
+    # num cols = keyword length
+    move $a0, $s5
+    div $s4, $s6 # heap size / keyword length
+    mflo $a1
+    move $a2, $s6
+    move $a3, $s2
+    addi $sp, $sp, -4
+    li $t0, 1
+    sw $t0, 0($sp)
+    jal key_sort_matrix
+    addi $sp, $sp, 4
 
+p7_transpose:
+    move $a0, $s5
+    move $a1, $s3
+    div $s4, $s6 
+    mflo $a2
+    move $a3, $s6
+    jal transpose
+
+p7_add_null_terminator:
+    add $t0, $s4, $s3 #add address + heap size
+    sb $0, ($t0)
 
 lw $ra, 0($sp)
-lw $s4, 4($sp)
-lw $s3, 8($sp)
-lw $s2, 12($sp)
-lw $s1, 16($sp)
-lw $s0, 20($sp)
-addi $sp, $sp, 24
+lw $s6, 4($sp)
+lw $s5, 8($sp)
+lw $s4, 12($sp)
+lw $s3, 16($sp)
+lw $s2, 20($sp)
+lw $s1, 24($sp)
+lw $s0, 28($sp)
+addi $sp, $sp, 32
 jr $ra
 
 # Part VIII
