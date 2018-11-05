@@ -75,6 +75,43 @@ p5_helper:
     sw $t3, ($t0)
     jr $ra
 
+# Helper - Part VIII
+# checks if the character given is any of the following: ADFGVX
+# if so, returns corresponding index, else, returns -1
+p8_helper:
+    # a0 = letter
+    beq $a0, 'A', p8_helper_A
+    beq $a0, 'D', p8_helper_D
+    beq $a0, 'F', p8_helper_F
+    beq $a0, 'G', p8_helper_G
+    beq $a0, 'V', p8_helper_V
+    beq $a0, 'X', p8_helper_X
+    j p8_helper_error
+
+    p8_helper_A:
+        li $v0, 0
+        j p8_helper_done
+    p8_helper_D:
+        li $v0, 1
+        j p8_helper_done
+    p8_helper_F:
+        li $v0, 2
+        j p8_helper_done
+    p8_helper_G:
+        li $v0, 3
+        j p8_helper_done
+    p8_helper_V:
+        li $v0, 4
+        j p8_helper_done
+    p8_helper_X:
+        li $v0, 5
+        j p8_helper_done
+
+    p8_helper_error:
+        li $v0, -1
+    p8_helper_done:
+        jr $ra
+
 # Part I
 get_adfgvx_coords:
 # a0 = index1
@@ -507,10 +544,56 @@ jr $ra
 
 # Part VIII
 lookup_char:
-li $v0, -200
-li $v1, -200
+# a0 = adfgvx grid
+# a1 = row char
+# a2 = col char
 
-jr $ra
+addi $sp, $sp, -16
+sw $s0, 12($sp)
+sw $s1, 8($sp)
+sw $s2, 4($sp)
+sw $ra, 0($sp)
+
+move $s0, $a0
+move $s1, $a1
+move $s2, $a2
+
+move $a0, $s1 # test row char
+jal p8_helper
+beq $v0, -1, p8_error_case
+move $s1, $v0 # move row index to s1
+
+move $a0, $s2 # test col char
+jal p8_helper
+beq $v0, -1, p8_error_case
+move $s2, $v0 # move col index to s2
+
+# valid characters
+
+#adfgvx grid is 6x6 --> num cols = 6
+# index of letter = 6 * i + j
+li $t0, 6
+mult $t0, $s1
+mflo $t0
+add $t0, $t0, $s2 # proper index = t0
+add $t0, $t0, $s0 # add base address
+
+lbu $v1, ($t0)
+li $v0, 0
+
+j p8_done
+
+p8_error_case:
+    li $v0, -1
+    li $v1, -1
+
+p8_done:
+    lw $ra, 0($sp)
+    lw $s2, 4($sp)
+    lw $s1, 8($sp)
+    lw $s0, 12($sp)
+    addi $sp, $sp, 16
+    jr $ra
 
 # Part IX
 string_sort:
