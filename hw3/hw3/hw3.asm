@@ -115,8 +115,57 @@ p2_done:
 
 # Part III
 map_plaintext:
-li $v0, -200
-li $v1, -200
+# a0 = adfgvx char array address
+# a1 = null terminated message to convert to ADFGVX coordinates
+# a2 = mapping char array address
+
+# for each character of the string
+    # look for row and col
+    # get adfgvx letters corresponding to row and col
+# put letters into mapping
+
+# need to save:a0,a1,a2,ra
+addi $sp, $sp, -16
+sw $s0, 12($sp)
+sw $s1, 8($sp)
+sw $s2, 4($sp)
+sw $ra, 0($sp)
+
+move $s0, $a0
+move $s1, $a1
+move $s2, $a2
+
+lbu $t0, ($s1)
+p3_traverse_string:
+    beqz  $t0, p3_done
+
+    # t0 = current string char
+    move $a0, $s0
+    move $a1, $t0
+    jal search_adfgvx_grid
+
+    move $a0, $v0 
+    move $a1, $v1
+    jal get_adfgvx_coords
+
+    sb $v0, ($s2)
+    addi $s2, $s2, 1
+    sb $v1, ($s2)
+    addi $s2, $s2, 1
+
+    addi $s1, $s1, 1
+    lbu $t0, ($s1)
+    j  p3_traverse_string
+
+p3_done:
+    # sb $0, ($s1) #add a null terminator
+
+
+lw $ra, 0($sp)
+lw $s2, 4($sp)
+lw $s1, 8($sp)
+lw $s0, 12($sp)
+addi $sp, $sp, 16
 
 jr $ra
 
