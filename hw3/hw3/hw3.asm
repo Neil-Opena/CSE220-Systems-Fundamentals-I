@@ -171,10 +171,47 @@ jr $ra
 
 # Part IV
 swap_matrix_columns:
-li $v0, -200
-li $v1, -200
+# a0 = matrix address
+# a1 = number of rows
+# a2 = number of cols
+# a3 = index of first column to swap
+# 0($sp) = index of second column to swap
 
-jr $ra
+ble $a1, 0, p4_error_case # num_rows <= 0
+ble $a2, 0, p4_error_case # num_cols <= 0
+bltz $a3, p4_error_case
+bge $a3, $a2, p4_error_case
+
+lb $t0, 0($sp)
+bltz $t0, p4_error_case
+bge $t0, $a2, p4_error_case
+
+li $t1, 0 # t1 = row
+add $a3, $a3, $a0 # col1 += address
+add $t0, $t0, $a0 # col2 += address
+p4_traverse_rows:
+    bge $t1, $a1, p4_success_case
+    # swap(col1, col2)
+    lbu $t2, ($a3)
+    lbu $t3, ($t0)
+    sb $t2, ($t0)
+    sb $t3, ($a3)
+
+    add $a3, $a3, $a2 # col1 += num cols
+    add $t0, $t0, $a2 # col2 += num cols
+
+    addi $t1, $t1, 1
+    j p4_traverse_rows
+
+p4_success_case:
+    li $v0, 0
+    jr $ra
+
+p4_error_case:
+    li $v0, -1
+
+p4_done:
+    jr $ra
 
 # Part V
 key_sort_matrix:
