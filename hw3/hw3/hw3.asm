@@ -190,6 +190,9 @@ p3_traverse_string:
 p3_done:
     # sb $0, ($s1) #add a null terminator
 
+    # FIXME 
+    # FIXME
+    # FIXME
 
     lw $ra, 0($sp)
     lw $s2, 4($sp)
@@ -342,12 +345,49 @@ p5_done:
     addi $sp, $sp, 36
     jr $ra
 
-# Part IV
+# Part VI
 transpose:
-li $v0, -200
-li $v1, -200
+# a0 = src matrix address
+# a1 = dest matrix address
+# a2 = src matrix num rows
+# a3 = src matrix num cols
 
-jr $ra
+ble $a2, 0, p6_error_case # rows <= 0
+ble $a3, 0, p6_error_case # cols <= 0
+
+li $t0, 0 # j
+p6_traverse_cols:
+    bge $t0, $a3, p6_success_case  # col >= num cols
+
+    li $t1, 0 # i
+    p6_traverse_rows:
+        bge $t1, $a2, p6_continue_col
+
+        # traverse in col major order
+        # src[i][j] = i * num_cols + j
+        mult $t1, $a3
+        mflo $t2 # t2 = i * num_cols
+        add $t2, $t2, $t0 # t2 += j
+        add $t2, $t2, $a0 # add base address
+        lbu $t3, ($t2)
+
+        sb $t3, ($a1)
+
+        addi $t1, $t1, 1
+        addi $a1, $a1, 1 # go to next dest matrix address
+        j p6_traverse_rows
+
+    p6_continue_col:
+        addi $t0, $t0, 1
+        j p6_traverse_cols
+
+p6_success_case:
+    li $v0, 0
+    j p6_done
+p6_error_case:
+    li $v0, -1
+p6_done:
+    jr $ra
 
 # Part VII
 encrypt:
