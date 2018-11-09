@@ -798,6 +798,7 @@ p10_transpose_matrix_setup:
         p10_decode_loop:
             lbu $t0, ($s7)
             beq $t0, '*', p10_append_null
+            beqz $t0, p10_append_null
 
             addi $s7, $s7, 1
             lbu $t1, ($s7)
