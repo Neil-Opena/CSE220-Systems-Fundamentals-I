@@ -119,6 +119,19 @@ move $a0, $v1
 syscall
 li $a0, '\n'
 syscall
+# (5, 5)
+li $a0, 5
+li $a1, 5
+jal get_adfgvx_coords
+move $a0, $v0
+li $v0, 11
+syscall
+li $a0, ' '
+syscall
+move $a0, $v1
+syscall
+li $a0, '\n'
+syscall
 
 li $v0, 10
 syscall
