@@ -112,6 +112,24 @@ p8_helper:
     p8_helper_done:
         jr $ra
 
+# Helper - Part X
+# gets index of character in specified string
+p10_helper:
+    # a0 = string 
+    # a1 = character
+    li $t0, 0
+    p10_helper_loop:
+        lbu $t1, ($a0)
+        beq $t1, $a1, p10_helper_done
+        addi $a0, $a0, 1
+        addi $t0, $t0, 1
+        j p10_helper_loop
+
+    p10_helper_done:
+        move $v0, $t0
+        jr $ra
+
+
 # Part I
 get_adfgvx_coords:
 # a0 = index1
@@ -646,8 +664,172 @@ p9_done:
 
 # Part X
 decrypt:
-li $v0, -200
-li $v1, -200
+# a0 = adfgvx grid
+# a1 = null terminated ciphertext
+# a2 = keyword
+# a3 = plaintext space
+addi $sp, $sp, -36
+sw $s0, 32($sp)
+sw $s1, 28($sp)
+sw $s2, 24($sp)
+sw $s3, 20($sp)
+sw $s4, 16($sp)
+sw $s5, 12($sp)
+sw $s6, 8($sp)
+sw $s7, 4($sp)
+sw $ra, 0($sp)
+
+move $s0, $a0 
+move $s1, $a1
+move $s2, $a2
+move $s3, $a3
+# s4 = length of keyword
+# s5 = heap_keyword address
+# s6 = heap_keyword_indices address
+# s7 = heap_ciphertext address
+
+li $s4, 0
+move $t0, $s2 # t0 = used to traverse keyword
+p10_loop_keyword:
+    lbu $t1, ($t0)
+    beqz $t1, p10_copy_keyword_setup
+    addi $t0, $t0, 1
+    addi $s4, $s4, 1
+    j p10_loop_keyword
+
+p10_copy_keyword_setup:
+    move $a0, $s4
+    li $v0, 9
+    syscall
+    move $s5, $v0 # s5 = heap_keyword
+
+    li $t0, 0
+    p10_copy_keyword:
+        bge $t0, $s4, p10_sort_heap_keyword
+
+        add $t1, $t0, $s2
+        add $t2, $t0, $s5
+        lb $t3, ($t1)
+        sb $t3, ($t2)
+
+        addi $t0, $t0, 1
+        j p10_copy_keyword
+
+p10_sort_heap_keyword:
+    move $a0, $s5
+    jal string_sort
+
+p10_create_heap_keyword_indices:
+    sll $t0, $s4, 2
+    # multiply keyword length by 4, one word for each integer
+    move $a0, $t0
+    li $v0, 9
+    syscall
+    move $s6, $v0 # s6 = heap_keyword_indices
+
+    li $s7, 0 # s7 = temp variable  = i
+    p10_loop_keyword_indices:
+        bge $s7, $s4, p10_transpose_matrix_setup
+
+        add $t1, $s7, $s5 # heap_keyword[i]
+
+        move $a0, $s2
+        lbu $a1, ($t1)
+        jal p10_helper
+
+        sll $t0, $s7, 2
+        add $t1, $t0, $s6 # heap_keyword_indices[i]
+        sw $v0, ($t1)
+
+        addi $s7, $s7, 1
+        j p10_loop_keyword_indices
+
+p10_transpose_matrix_setup:
+    # interpret cipthertext array as (keyword_length) rows * (cipthertext array size / keyword_length) cols
+
+    # get size of ciphtertext
+    li $s7, 0 # s7 = temp variable for now
+    move $t1, $s1 # t1 = used to traverse ciphertext
+    p10_loop_ciphertext:
+        lbu $t2, ($t1)
+        beqz $t2, p10_create_ciphertext_array
+        addi $s7, $s7, 1
+        addi $t1, $t1, 1
+        j p10_loop_ciphertext
+
+
+    p10_create_ciphertext_array:
+        # allocate 2D array on heap 
+        move $a0, $s7
+        li $v0, 9
+        syscall
+        move $s2, $s7 # move ciphertext length to s2 (no longer need keyword)
+        move $s7, $v0 # s7 = heap_ciphertext_array
+
+
+    p10_transpose_matrix:
+        div $s2, $s4 # divide ciphertext array length by keyword length
+
+        move $a0, $s1 # matrix src
+        move $a1, $s7 # matrix dest
+        move $a2, $s4 # matrix src num rows
+        mflo $a3 # matrix src num cols
+        jal transpose
+
+    p10_unsort_matrix:
+        div $s2, $s4 # divide ciphertext array length by keyword length
+        # matrix = heap_cipher_text_array
+        # num rows = ciphtertext array length / keyword length
+        # num cols = keyword length
+        # key = heap_keyword_indices
+        # elem size
+        move $a0, $s7
+        mflo $a1
+        move $a2, $s4
+        move $a3, $s6
+        addi $sp, $sp, -4
+        li $t0, 4 # 4 = array of words (integers)
+        sw $t0, 0($sp)
+        jal key_sort_matrix
+        addi $sp, $sp, 4
+
+    p10_decode:
+        #until it reaches a * at the end
+        p10_decode_loop:
+            lbu $t0, ($s7)
+            beq $t0, '*', p10_append_null
+
+            addi $s7, $s7, 1
+            lbu $t1, ($s7)
+
+            move $a0, $s0
+            move $a1, $t0 # row char
+            move $a2, $t1 # col char
+            jal lookup_char
+
+            # character in v1
+            sb $v1, ($s3)
+
+            addi $s7, $s7, 1
+            addi $s3, $s3, 1
+            j p10_decode_loop
+
+        p10_append_null:
+            sb $0, ($s3)
+            #put a null terminator
+
+
+lw $ra, 0($sp)
+lw $s7, 4($sp)
+lw $s6, 8($sp)
+lw $s5, 12($sp)
+lw $s4, 16($sp)
+lw $s3, 20($sp)
+lw $s2, 24($sp)
+lw $s1, 28($sp)
+lw $s0, 32($sp)
+addi $sp, $sp, 36
+
 
 jr $ra
 
