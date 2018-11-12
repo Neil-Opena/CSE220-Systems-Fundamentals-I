@@ -1,5 +1,5 @@
 .data
-map_filename: .asciiz "map3.txt"
+map_filename: .asciiz "CSE220-Github/hw4/hw4/map3.txt"
 # num words for map: 45 = (num_rows * num_cols + 2) // 4 
 # map is random garbage initially
 .asciiz "Don't touch this region of memory"
@@ -42,6 +42,9 @@ li $v0, 4
 syscall
 
 # fill in arguments
+la $a0, map_filename
+la $a1, map
+la $a2, player
 jal init_game
 
 # fill in arguments
