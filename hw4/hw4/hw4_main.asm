@@ -47,6 +47,8 @@ la $a1, map
 la $a2, player
 jal init_game
 
+j exit
+
 # fill in arguments
 jal reveal_area
 
