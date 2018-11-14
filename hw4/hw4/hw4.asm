@@ -255,9 +255,58 @@ p3_done:
 
 # Part IV
 set_cell:
-li $v0, -200
-li $v1, -200
-jr $ra
+# a0 = address of Map struct
+# a1 = row index
+# a2 = col index
+# a3 = byte to be written
+
+# returns -1 if error (same as is_valid conditions)
+addi $sp, $sp, -20
+sw $s0, 16($sp)
+sw $s1, 12($sp)
+sw $s2, 8($sp)
+sw $s3, 4($sp)
+sw $ra, 0($sp)
+
+move $s0, $a0
+move $s1, $a1
+move $s2, $a2
+move $s3, $a3
+
+# arguments are already in their respective a registers for is_valid
+jal is_valid_cell
+bne $v0, $0, p4_error
+# otherwise it is a valid index
+
+lbu $t0, 1($s0) # t0 = map num cols
+
+addi $s0, $s0, 2 # s0 now points to cell[0][0]
+
+# elem size = 1
+# index =  (row index) * (num cols) + (col index) + (base address)
+
+mult $s1, $t0
+mflo $t2 # t2 = row index * num cols
+add $t2, $t2, $s2 # t2 = t2 + col index
+add $t2, $t2, $s0 # add base address
+
+sb $s3, ($t2) # store byte
+
+li $v0, 0
+j p4_done
+
+p4_error:
+    li $v0, -1
+
+p4_done:
+    lw $ra, 0($sp)
+    lw $s3, 4($sp)
+    lw $s2, 8($sp)
+    lw $s1, 12($sp)
+    lw $s0, 16($sp)
+    addi $sp, $sp, 20
+
+    jr $ra
 
 
 # Part V

@@ -72,13 +72,73 @@ jal init_game
 # ############################
 
 
+# ############################
+# # Get the Contents of a Cell
+# ############################
+# la $a0, map
+# li $a1, 26
+# li $a2, 7
+# jal get_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+# la $a0, map
+# li $a1, -1
+# li $a2, 3
+# jal get_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+# la $a0, map
+# li $a1, 0
+# li $a2, 0
+# jal get_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+# la $a0, map
+# li $a1, 0
+# li $a2, 7
+# jal get_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+# la $a0, map
+# li $a1, 3
+# li $a2, 2
+# jal get_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+
 ############################
-# Get the Contents of a Cell
+# Set the Contents of a Cell 
 ############################
 la $a0, map
 li $a1, 26
 li $a2, 7
-jal get_cell
+li $a3, '$'
+jal set_cell
 move $a0, $v0
 li $v0, 1
 syscall
@@ -89,7 +149,8 @@ syscall
 la $a0, map
 li $a1, -1
 li $a2, 3
-jal get_cell
+li $a3, '.'
+jal set_cell
 move $a0, $v0
 li $v0, 1
 syscall
@@ -100,7 +161,8 @@ syscall
 la $a0, map
 li $a1, 0
 li $a2, 0
-jal get_cell
+li $a3, '$'
+jal set_cell
 move $a0, $v0
 li $v0, 1
 syscall
@@ -111,7 +173,8 @@ syscall
 la $a0, map
 li $a1, 0
 li $a2, 7
-jal get_cell
+li $a3, '.'
+jal set_cell
 move $a0, $v0
 li $v0, 1
 syscall
@@ -122,7 +185,8 @@ syscall
 la $a0, map
 li $a1, 3
 li $a2, 2
-jal get_cell
+li $a3, '$'
+jal set_cell
 move $a0, $v0
 li $v0, 1
 syscall
