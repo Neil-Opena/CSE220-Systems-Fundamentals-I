@@ -1,0 +1,76 @@
+.data
+map_filename: .asciiz "CSE220-Github/hw4/hw4/map3.txt"
+map: .word 0x632DEF01 0xAB101F01 0xABCDEF01 0x00000201 0x22222222 0xA77EF01 0x88CDEF01 0x90CDEF01 0xABCD2212 0x632DEF01 0xAB101F01 0xABCDEF01 0x00000201 0x22222222 0xA77EF01 0x88CDEF01 0x90CDEF01 0xABCD2212 0x632DEF01 0xAB101F01 0xABCDEF01 0x00000201 0x22222222 0xA77EF01 0x88CDEF01 0x90CDEF01 0xABCD2212 0x632DEF01 0xAB101F01 0xABCDEF01 0x00000201 0x22222222 0xA77EF01 0x88CDEF01 0x90CDEF01 0xABCD2212 0x632DEF01 0xAB101F01 0xABCDEF01 0x00000201 0x22222222 0xA77EF01 0x88CDEF01 0x90CDEF01 0xABCD2212 
+player: .word 0x2912FECD
+
+.text
+
+.globl main
+main:
+la $a0, map_filename
+la $a1, map
+la $a2, player
+jal init_game
+
+############################
+la $a0, map
+li $a1, 5
+li $a2, 3
+jal is_valid_cell
+move $a0, $v0
+li $v0, 1
+syscall
+li $a0, '\n'
+li $v0, 11
+syscall
+############################
+la $a0, map
+li $a1, 0
+li $a2, 0
+jal is_valid_cell
+move $a0, $v0
+li $v0, 1
+syscall
+li $a0, '\n'
+li $v0, 11
+syscall
+############################
+la $a0, map
+li $a1, 6
+li $a2, 24
+jal is_valid_cell
+move $a0, $v0
+li $v0, 1
+syscall
+li $a0, '\n'
+li $v0, 11
+syscall
+############################
+la $a0, map
+li $a1, 25
+li $a2, 3
+jal is_valid_cell
+move $a0, $v0
+li $v0, 1
+syscall
+li $a0, '\n'
+li $v0, 11
+syscall
+############################
+la $a0, map
+li $a1, -3
+li $a2, 4
+jal is_valid_cell
+move $a0, $v0
+li $v0, 1
+syscall
+li $a0, '\n'
+li $v0, 11
+syscall
+############################
+
+exit:
+li $v0, 10
+syscall
+
+.include "hw4.asm"

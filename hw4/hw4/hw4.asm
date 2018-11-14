@@ -175,13 +175,44 @@ jr $ra
 
 # Part II
 is_valid_cell:
-li $v0, -200
-li $v1, -200
-jr $ra
+# a0 = starting address of a Map struct
+# a1 = row (0 based row index of the desired byte)
+# a2 = col (0 based col index of the desired byte)
+
+# returns v0 = 0 if (row, col) a valid index pair, or -1 if not
+
+lbu $t0, ($a0) # t0 = num rows of map
+addi $a0, $a0, 1 # t1 = num cols of map
+lbu $t1, ($a0)
+
+bltz $a1, p2_error # row < 0
+bge $a1, $t0, p2_error # row >= num rows
+bltz $a2, p2_error # col < 0
+bge $a2, $t1, p2_error # col >= num cols
+
+li $v0, 0
+j p2_done
+
+p2_error:
+    li $v0, -1
+
+p2_done:
+    jr $ra
 
 
 # Part III
 get_cell:
+# a0 = starting address of a Map struct
+# a1 = row (0 based row index of the desired byte)
+# a2 = col (0 based col index of the desired byte)
+
+# returns -1 in v0 for error
+# row < 0
+# row >= map_ptr.num_rows
+# col < 0
+# col >= map_ptr.num_cols
+
+# returns v0 = byte at map_ptr.cells[row][col]
 li $v0, -200
 li $v1, -200
 jr $ra
