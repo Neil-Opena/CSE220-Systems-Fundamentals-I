@@ -12,11 +12,84 @@ la $a1, map
 la $a2, player
 jal init_game
 
+# ############################
+# # Is Valid Cell
+# ############################
+# la $a0, map
+# li $a1, 5
+# li $a2, 3
+# jal is_valid_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+# la $a0, map
+# li $a1, 0
+# li $a2, 0
+# jal is_valid_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+# la $a0, map
+# li $a1, 6
+# li $a2, 24
+# jal is_valid_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+# la $a0, map
+# li $a1, 25
+# li $a2, 3
+# jal is_valid_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+# la $a0, map
+# li $a1, -3
+# li $a2, 4
+# jal is_valid_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+
+
+############################
+# Get the Contents of a Cell
 ############################
 la $a0, map
-li $a1, 5
+li $a1, 26
+li $a2, 7
+jal get_cell
+move $a0, $v0
+li $v0, 1
+syscall
+li $a0, '\n'
+li $v0, 11
+syscall
+############################
+la $a0, map
+li $a1, -1
 li $a2, 3
-jal is_valid_cell
+jal get_cell
 move $a0, $v0
 li $v0, 1
 syscall
@@ -27,7 +100,7 @@ syscall
 la $a0, map
 li $a1, 0
 li $a2, 0
-jal is_valid_cell
+jal get_cell
 move $a0, $v0
 li $v0, 1
 syscall
@@ -36,9 +109,9 @@ li $v0, 11
 syscall
 ############################
 la $a0, map
-li $a1, 6
-li $a2, 24
-jal is_valid_cell
+li $a1, 0
+li $a2, 7
+jal get_cell
 move $a0, $v0
 li $v0, 1
 syscall
@@ -47,20 +120,9 @@ li $v0, 11
 syscall
 ############################
 la $a0, map
-li $a1, 25
-li $a2, 3
-jal is_valid_cell
-move $a0, $v0
-li $v0, 1
-syscall
-li $a0, '\n'
-li $v0, 11
-syscall
-############################
-la $a0, map
-li $a1, -3
-li $a2, 4
-jal is_valid_cell
+li $a1, 3
+li $a2, 2
+jal get_cell
 move $a0, $v0
 li $v0, 1
 syscall

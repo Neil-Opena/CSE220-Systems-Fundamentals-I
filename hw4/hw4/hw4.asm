@@ -206,16 +206,51 @@ get_cell:
 # a1 = row (0 based row index of the desired byte)
 # a2 = col (0 based col index of the desired byte)
 
-# returns -1 in v0 for error
-# row < 0
-# row >= map_ptr.num_rows
-# col < 0
-# col >= map_ptr.num_cols
+# returns -1 in v0 for error (same conditions as is_valid)
 
+addi $sp, $sp, -16
+sw $s0, 12($sp)
+sw $s1, 8($sp)
+sw $s2, 4($sp)
+sw $ra, 0($sp)
+#  preserve argument values and ra
+
+move $s0, $a0
+move $s1, $a1
+move $s2, $a2
+
+# arguments are already in their respective a registers for is_valid
+jal is_valid_cell
+bne $v0, $0, p3_error
+# otherwise it is a valid index
+
+lbu $t0, 1($s0) # t0 = map num cols
+
+addi $s0, $s0, 2 # s0 now points to cell[0][0]
+
+# elem size = 1
+# index =  (row index) * (num cols) + (col index) + (base address)
+
+mult $s1, $t0
+mflo $t2 # t2 = row index * num cols
+add $t2, $t2, $s2 # t2 = t2 + col index
+add $t2, $t2, $s0 # add base address
+
+lbu $v0, ($t2)
 # returns v0 = byte at map_ptr.cells[row][col]
-li $v0, -200
-li $v1, -200
-jr $ra
+j p3_done
+
+p3_error:
+    li $v0, -1
+
+p3_done:
+    lw $ra, 0($sp)
+    lw $s2, 4($sp)
+    lw $s1, 8($sp)
+    lw $s0, 12($sp)
+    addi $sp, $sp, 16
+
+    jr $ra
 
 
 # Part IV
