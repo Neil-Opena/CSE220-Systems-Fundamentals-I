@@ -25,6 +25,7 @@ move $t2, $a2 # t2 = player pointer
 # t5 = will hold num cols
 # t6 = temp variable
 # t7 = temp variable
+# t8 = temp variable
 
 # since MARS is a simulator, syscalls won't affect t registers
 
@@ -89,47 +90,74 @@ p1_map_cols_done:
     sb $t5, ($t1)
     addi $t1, $t1, 1 # move forward 1 byte in a1
 
-# # s0 = num_rows * num_cols
-# mult $s0, $s4
-# mflo $s0  # s0 = num of bytes to read for map
-# li $s4, 0 # s4 = counter
-# p1_read_map:
-#     bge $s4, $s0, p1_success
+#t6 = num_rows * num_cols
+mult $t4, $t5
+mflo $t6  # t6 = num of bytes to read for map
+li $t7, 0 # t7 = counter
+p1_read_map:
+    bge $t7, $t6, p1_read_player
 
-#     li $v0, 14
-#     move $a0, $s3
-#     move $a1, $s1
-#     li $a2, 1
-#     syscall
-#     bltz $v0, p1_error # negative if error
+    li $v0, 14
+    move $a0, $t3
+    move $a1, $t1
+    li $a2, 1
+    syscall
+    bltz $v0, p1_error # negative if error
 
-#     lbu $t0, ($s1)
-#     beq $t0, 10, p1_read_map # ASCII newline - don't store
-#     bne $t0, 64, p1_not_player# ASCII '@'
+    lbu $t8, ($t1)
+    beq $t8, 10, p1_read_map # ASCII newline - don't store
+    bne $t8, 64, p1_not_player# ASCII '@'
 
-#     # read player information
-#     # (counter) mod (num_cols) = column index
-#     # (counter) / (num_cols) = row index
+    # read player position information
+    # (counter) mod (num_cols) = column index
+    # (counter) / (num_cols) = row index
 
-#     div		$t0, $t1			# $t0 / $t1
-#     mflo	$t2					# $t2 = floor($t0 / $t1) 
-#     mfhi	$t3					# $t3 = $t0 mod $t1 
+    div $t7, $t5 
+    mflo $t5 # t6 = floor(counter / cols) = row 
+    mfhi $t4 # t4 = counter mod cols = col
 
-#     # NEED A NUM COLS REGISTER BRUHHH
+    sb $t5, ($t2) # store row
+    addi $t2, $t2, 1 # go to next byte
+    sb $t4, ($t2) # store col
+    addi $t2, $t2, 1
 
+    p1_not_player:
+        # set hidden flag - every character initially hidden
+        # 1000 0000 = 0x80
+        xori $t8, $t8, 0x80
+        sb $t8, ($t1)
 
-#     p1_not_player:
-#         # set hidden flag - every character initially hidden
-#         # 1000 0000 = 0x80
-#         xori $t0, $t0, 0x80
-#         sb $t0, ($s1)
+        addi $t1, $t1, 1
+        addi $t7, $t7, 1 # increase counter
 
-#         addi $s1, $s1, 1
-#         addi $s4, $s4, 1 # increase counter
+    j p1_read_map
 
-#     j p1_read_map
+li $t6, 0
+p1_read_player:
+    li $v0, 14
+    move $a0, $t3
+    move $a1, $t2 # input buffer = player struct byte 2
+    li $a2, 1
+    syscall
+
+    lbu $t7, ($t2)
+    beqz $t7, p1_success # null terminator
+    beq $t7, 10, p1_success # ASCII '\n'
+    # otherwise it is a valid ASCII numerical character
+
+    li $t8, 10
+    mult $t6, $t8 # multiply numbers in register by 10
+    mflo $t6
+
+    addi $t7, $t7, -48 # - ASCII '0' - turn read byte into a digit
+    add $t6, $t6, $t7 # add digit to current number of rows
+
+    j p1_read_player
 
 p1_success:
+    addi $t2, $t2, 1 # go to next player byte
+    # store 0 = num coins
+    sb $0, ($t2)
     li $v0, 0
     j p1_done
 
@@ -138,7 +166,7 @@ p1_error:
 
 p1_done:
     li $v0, 16 # close file
-    move $a0, $s3
+    move $a0, $t3
     syscall
 
 # v0 = 0 if successful, -1 otherwise
