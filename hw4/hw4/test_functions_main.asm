@@ -197,12 +197,23 @@ jal init_game
 
 ###########################
 # Reveal the Contents of a Cell 
-###########################
+# ########################### test one at a time for this
+# la $a0, map
+# li $a1, 6
+# li $a2, 4
+# jal reveal_area
+############################
+# la $a0, map
+# li $a1, -1
+# li $a2, 0
+# jal reveal_area
+# ############################
 la $a0, map
-li $a1, 6
-li $a2, 4
+li $a1, -2
+li $a2, -1
 jal reveal_area
 ############################
+
 
 exit:
 li $v0, 10
