@@ -26,11 +26,85 @@ you_failed_str: .asciiz "You have failed in your quest!\n"
 print_map:
 la $t0, map  # the function does not need to take arguments
 
-jr $ra
+lbu $t1, 0($t0) # t1 = num rows
+lbu $t2, 1($t0) # t2 = num cols
+addi $t0, $t0, 2 # t0 = cells[0][0]
+
+li $v0, 11 # syscall setup
+li $t5, 0 # t5 = row counter
+print_map_row_loop:
+    bge $t5, $t1, done_printing_map_row
+
+    li $t4, 0 # t4 = col counter
+    print_map_col_loop:
+        bge $t4, $t2, continue_print_row
+        lbu $a0, ($t0) # FIXME check if hidden or not
+        andi $t6, $a0, 0x80
+        # 1 == hidden from the player
+        beqz $t6, not_hidden
+        li $a0, ' '
+
+        not_hidden:
+        syscall
+        addi $t0, $t0, 1
+        addi $t4, $t4, 1
+        j print_map_col_loop
+
+    continue_print_row:
+        # print newline 
+        li $a0, '\n'
+        syscall
+        addi $t5, $t5, 1
+        j print_map_row_loop
+
+done_printing_map_row:
+    jr $ra
 
 print_player_info:
 # the idea: print something like "Pos=[3,14] Health=[4] Coins=[1]"
 la $t0, player
+
+li $v0, 4
+la $a0, pos_str
+syscall
+
+# get row
+li $v0, 1
+lbu $a0, 0($t0)
+syscall
+# print comma
+li $v0, 11
+li $a0, ','
+syscall
+# get col
+li $v0, 1
+lbu $a0, 1($t0)
+syscall
+
+li $v0, 4
+la $a0, health_str
+syscall
+
+# get health (signed)
+li $v0, 1
+lb $a0, 2($t0)
+syscall
+
+li $v0, 4
+la $a0, coins_str
+syscall
+
+# get coins
+li $v0, 1
+lbu $a0, 3($t0)
+syscall
+
+# print bracket and newline
+li $v0, 11
+li $a0, ']'
+syscall
+li $a0, '\n'
+syscall
 
 jr $ra
 
@@ -46,8 +120,6 @@ la $a0, map_filename
 la $a1, map
 la $a2, player
 jal init_game
-
-j exit
 
 # fill in arguments
 jal reveal_area
