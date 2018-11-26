@@ -131,68 +131,77 @@ jal init_game
 # syscall
 # ############################
 
-############################
-# Set the Contents of a Cell 
-############################
+# ###########################
+# # Set the Contents of a Cell 
+# ###########################
+# la $a0, map
+# li $a1, 26
+# li $a2, 7
+# li $a3, '$'
+# jal set_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+# la $a0, map
+# li $a1, -1
+# li $a2, 3
+# li $a3, '.'
+# jal set_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+# la $a0, map
+# li $a1, 0
+# li $a2, 0
+# li $a3, '$'
+# jal set_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+# la $a0, map
+# li $a1, 0
+# li $a2, 7
+# li $a3, '.'
+# jal set_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+# la $a0, map
+# li $a1, 3
+# li $a2, 2
+# li $a3, '$'
+# jal set_cell
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+
+###########################
+# Reveal the Contents of a Cell 
+###########################
 la $a0, map
-li $a1, 26
-li $a2, 7
-li $a3, '$'
-jal set_cell
-move $a0, $v0
-li $v0, 1
-syscall
-li $a0, '\n'
-li $v0, 11
-syscall
-############################
-la $a0, map
-li $a1, -1
-li $a2, 3
-li $a3, '.'
-jal set_cell
-move $a0, $v0
-li $v0, 1
-syscall
-li $a0, '\n'
-li $v0, 11
-syscall
-############################
-la $a0, map
-li $a1, 0
-li $a2, 0
-li $a3, '$'
-jal set_cell
-move $a0, $v0
-li $v0, 1
-syscall
-li $a0, '\n'
-li $v0, 11
-syscall
-############################
-la $a0, map
-li $a1, 0
-li $a2, 7
-li $a3, '.'
-jal set_cell
-move $a0, $v0
-li $v0, 1
-syscall
-li $a0, '\n'
-li $v0, 11
-syscall
-############################
-la $a0, map
-li $a1, 3
-li $a2, 2
-li $a3, '$'
-jal set_cell
-move $a0, $v0
-li $v0, 1
-syscall
-li $a0, '\n'
-li $v0, 11
-syscall
+li $a1, 6
+li $a2, 4
+jal reveal_area
 ############################
 
 exit:

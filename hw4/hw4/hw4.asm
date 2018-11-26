@@ -124,7 +124,7 @@ p1_read_map:
     p1_not_player:
         # set hidden flag - every character initially hidden
         # 1000 0000 = 0x80
-        xori $t8, $t8, 0x80
+        ori $t8, $t8, 0x80
         sb $t8, ($t1)
 
         addi $t1, $t1, 1
@@ -311,9 +311,78 @@ p4_done:
 
 # Part V
 reveal_area:
-li $v0, -200
-li $v1, -200
-jr $ra
+# a0 = address of Map struct
+# a1 = row index (in center of 3 x 3 area to be revealed)
+# a2 = col index (in center of 3 x 3 area to be revealed)
+
+addi $sp, $sp, -24
+sw $s0, 20($sp)
+sw $s1, 16($sp)
+sw $s2, 12($sp)
+sw $s3, 8($sp)
+sw $s4, 4($sp)
+sw $ra, 0($sp)
+
+move $s0, $a0
+addi $s1, $a1, 1 # s1 = row index limit 
+addi $s2, $a2, 1 # s2 = col index limit (right corner of 9 x 9 grid)
+
+#REMEMBER that map struct does not point immediately to 0,0
+
+addi $s3, $s1, -2 # s3 = row index of cell (start at left corner of 9 x 9 grid)
+p5_loop_rows:
+    bgt $s3, $s1, p5_done
+
+    addi $s4, $s2, -2 # s4 = col index of cell (start at left side)
+    p5_loop_cols:
+        bgt $s4, $s2, p5_continue_row
+
+        # if current row, col is valid
+            # get the cell 
+            # set the cell by setting bit 7 of the cell to 0
+
+        # check if valid
+        move $a0, $s0
+        move $a1, $s3 # row to test
+        move $a2, $s4 # col to test
+        jal is_valid_cell
+        bne $v0, $0, p5_not_valid
+        #else it is valid
+
+        # get the cell
+        move $a0, $s0
+        move $a1, $s3
+        move $a2, $s4
+        jal get_cell
+
+        # set bit 7 of the cell to 0
+        # 0111 1111
+        andi $t0, $v0, 0x7F
+        move $a0, $s0
+        move $a1, $s3
+        move $a2, $s4
+        move $a3, $t0
+        jal set_cell
+
+        p5_not_valid:
+
+        addi $s4, $s4, 1
+        j p5_loop_cols
+
+    p5_continue_row:
+
+    addi $s3, $s3, 1
+    j p5_loop_rows
+
+p5_done:
+    lw $ra, 0($sp)
+    lw $s4, 4($sp)
+    lw $s3, 8($sp)
+    lw $s2, 12($sp)
+    lw $s1, 16($sp)
+    lw $s0, 20($sp)
+    addi $sp, $sp, 24
+    jr $ra
 
 # Part VI
 get_attack_target:
