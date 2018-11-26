@@ -122,6 +122,10 @@ la $a2, player
 jal init_game
 
 # fill in arguments
+la $a0, map # map ptr
+la $t0, player
+lbu $a1, 0($t0) # player row
+lbu $a2, 1($t0) # player col
 jal reveal_area
 
 li $s0, 0  # move = 0
@@ -129,7 +133,6 @@ li $s0, 0  # move = 0
 game_loop:  # while player is not dead and move == 0:
 
 jal print_map # takes no args
-
 jal print_player_info # takes no args
 
 # print prompt
