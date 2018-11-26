@@ -327,8 +327,6 @@ move $s0, $a0
 addi $s1, $a1, 1 # s1 = row index limit 
 addi $s2, $a2, 1 # s2 = col index limit (right corner of 9 x 9 grid)
 
-#REMEMBER that map struct does not point immediately to 0,0
-
 addi $s3, $s1, -2 # s3 = row index of cell (start at left corner of 9 x 9 grid)
 p5_loop_rows:
     bgt $s3, $s1, p5_done
@@ -386,9 +384,85 @@ p5_done:
 
 # Part VI
 get_attack_target:
-li $v0, -200
-li $v1, -200
-jr $ra
+
+# a0 = Map struct address
+# a1 = Player struct address
+# a2 = char = {'U','D','L','R'}
+
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+
+beq $a2, 'U', p6_valid_char
+beq $a2, 'D', p6_valid_char
+beq $a2, 'L', p6_valid_char
+beq $a2, 'R', p6_valid_char
+
+j p6_error # not one of the valid characters
+
+p6_valid_char:
+    lbu $t0, 0($a1) # player row
+    lbu $t1, 1($a1) # player col
+
+    bne $a2, 'U', p6_not_U
+    # otherwise check up direction
+    # map pointer already in a0
+    addi $a1, $t0, -1 # previous row
+    move $a2, $t1
+    jal get_cell
+    j p6_target_cell_obtained
+
+    p6_not_U:
+    bne $a2, 'D', p6_not_D
+    # otherwise check down direction
+    # map pointer already in a0
+    addi $a1, $t0, 1 # next row
+    move $a2, $t1
+    jal get_cell
+    j p6_target_cell_obtained
+
+    p6_not_D:
+    bne $a2, 'L', p6_not_L
+    # otherwise check left direction
+    # map pointer already in a0
+    move $a1, $t0 
+    addi $a2, $t1, -1 # previous col
+    jal get_cell
+    j p6_target_cell_obtained
+
+    p6_not_L:
+    # otherwise check right direction
+    # map pointer already in a0
+    move $a1, $t0 
+    addi $a2, $t1, 1 # next col
+    jal get_cell
+
+    p6_target_cell_obtained:
+        # check if valid 
+        beq $v0, -1, p6_error
+
+        # ONLY FOR TESTING
+        # andi $v0, $v0, 0x7F
+        # UNCOMMENT TO TEST
+        
+
+        # check if 'm', 'B', or '/'
+        beq $v0, 'm', p6_valid_target_cell
+        beq $v0, 'B', p6_valid_target_cell
+        beq $v0, '/', p6_valid_target_cell
+
+        j p6_error
+
+        p6_valid_target_cell:
+            # v0 already contains the targeted cell
+            j p6_done
+
+p6_error:
+    li $v0, -1
+
+p6_done:
+    lw $ra, 0($sp)
+    addi $sp, $sp, 4
+    jr $ra
 
 
 # Part VII
