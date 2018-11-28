@@ -546,8 +546,109 @@ p7_done:
 
 # Part VIII
 monster_attacks:
-li $v0, -200
-li $v1, -200
+# a0 = address of Map
+# a1 = address of Player
+
+addi $sp, $sp, -20
+sw $s0, 16($sp)
+sw $s1, 12($sp)
+sw $s2, 8($sp)
+sw $s3, 4($sp)
+sw $ra, 0($sp)
+
+move $s0, $a0
+lb $s1, 0($a1) # s1 = player row
+lb $s2, 1($a1) # s2 = player col
+li $s3, 0 # s3 = damage 
+
+# check each direction
+
+# (r - 1, c)
+p8_check_up:
+    move $a0, $s0
+    addi $a1, $s1, -1
+    move $a2, $s2
+    jal get_cell
+    # ONLY FOR TESTING
+    # andi $v0, $v0, 0x7F
+    # UNCOMMENT TO TEST
+
+    beq $v0, 'm', p8_up_minion
+    beq $v0, 'B', p8_up_boss
+    j p8_check_down
+
+    p8_up_boss:
+        addi $s3, $s3, 1
+    p8_up_minion:
+        addi $s3, $s3, 1
+
+# (r + 1, c)
+p8_check_down:
+    move $a0, $s0
+    addi $a1, $s1, 1
+    move $a2, $s2
+    jal get_cell
+    # ONLY FOR TESTING
+    # andi $v0, $v0, 0x7F
+    # UNCOMMENT TO TEST
+
+    beq $v0, 'm', p8_down_minion
+    beq $v0, 'B', p8_down_boss
+    j p8_check_left
+
+    p8_down_boss:
+        addi $s3, $s3, 1
+    p8_down_minion:
+        addi $s3, $s3, 1
+
+# (r, c - 1)
+p8_check_left:
+    move $a0, $s0
+    move $a1, $s1
+    addi $a2, $s2, -1
+    jal get_cell
+    # ONLY FOR TESTING
+    # andi $v0, $v0, 0x7F
+    # UNCOMMENT TO TEST
+
+    beq $v0, 'm', p8_left_minion
+    beq $v0, 'B', p8_left_boss
+    j p8_check_right
+
+    p8_left_boss:
+        addi $s3, $s3, 1
+    p8_left_minion:
+        addi $s3, $s3, 1
+
+# (r, c + 1)
+p8_check_right:
+    move $a0, $s0
+    move $a1, $s1
+    addi $a2, $s2, 1
+    jal get_cell
+    # ONLY FOR TESTING
+    # andi $v0, $v0, 0x7F
+    # UNCOMMENT TO TEST
+
+    beq $v0, 'm', p8_right_minion
+    beq $v0, 'B', p8_right_boss
+    j p8_continue
+
+    p8_right_boss:
+        addi $s3, $s3, 1
+    p8_right_minion:
+        addi $s3, $s3, 1
+
+p8_continue:
+move $v0, $s3 # return damage
+
+lw $ra, 0($sp)
+lw $s3, 4($sp)
+lw $s2, 8($sp)
+lw $s1, 12($sp)
+lw $s0, 16($sp)
+addi $sp, $sp, 20
+
 jr $ra
 
 # Part IX

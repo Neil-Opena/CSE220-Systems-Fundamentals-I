@@ -300,6 +300,25 @@ jal init_game
 # jal complete_attack
 # ###########################
 
+# ###########################
+# Completing a Player's Attack
+# ########################### # test with new map, uncomment andi line
+la $a0, map_filename_monsters
+la $a1, map
+la $a2, player
+jal init_game
+# ###########################
+la $a0, map
+la $a1, player
+jal monster_attacks
+move $a0, $v0
+li $v0, 1
+syscall
+li $a0, '\n'
+li $v0, 11
+syscall
+# ###########################
+
 exit:
 li $v0, 10
 syscall
