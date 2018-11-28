@@ -95,7 +95,7 @@ mult $t4, $t5
 mflo $t6  # t6 = num of bytes to read for map
 li $t7, 0 # t7 = counter
 p1_read_map:
-    bge $t7, $t6, p1_read_player
+    bge $t7, $t6, p1_read_player_start
 
     li $v0, 14
     move $a0, $t3
@@ -132,7 +132,15 @@ p1_read_map:
 
     j p1_read_map
 
+p1_read_player_start:
 li $t6, 0
+# may not have read new line
+li $v0, 14
+move $a0, $t3
+move $a1, $t2
+li $a2, 1
+syscall
+
 p1_read_player:
     li $v0, 14
     move $a0, $t3
@@ -155,6 +163,7 @@ p1_read_player:
     j p1_read_player
 
 p1_success:
+    sb $t6, ($t2) # store player health
     addi $t2, $t2, 1 # go to next player byte
     # store 0 = num coins
     sb $0, ($t2)
@@ -653,9 +662,61 @@ jr $ra
 
 # Part IX
 player_move:
-li $v0, -200
-li $v1, -200
-jr $ra
+# a0 = address of Map struct
+# a1 = address of Player struct
+# a2 = target cell row
+# a3 = target cell col
+
+# externally deremined if the player can attempt to move to the target cell
+addi $sp, $sp, -20
+sw $s0, 16($sp)
+sw $s1, 12($sp)
+sw $s2, 8($sp)
+sw $s3, 4($sp)
+sw $ra, 0($sp)
+
+move $s0, $a0
+move $s1, $a1
+move $s2, $a2
+move $s3, $a3
+
+# calls monster_attacks
+# a0 , a1 already holds Map and Player struct addresses
+jal monster_attacks
+
+# substract from health
+lb $t0, 2($s1) # load current player health
+sub $t0, $t0, $v0 # health = current health - monster attack
+sb $t0, 2($s1) # store player health
+
+bgt $t0, $0, p9_check_cell # still alive
+# Nearby monsters killed the player
+# set plyaer position to 'X'
+move $a0, $s0
+lbu $a1, 0($s1)
+lbu $a2, 1($s1)
+li $a3, 'X'
+jal set_cell
+
+li $v0, 0
+j p9_done
+
+p9_check_cell:
+# target cell == '.' --> return 0
+
+# target cell == '$' --> return 0
+
+# target cell == '*' --> return 0
+
+# target cell == '>' --> return -1
+p9_done:
+    lw $ra, 0($sp)
+    lw $s3, 4($sp)
+    lw $s2, 8($sp)
+    lw $s1, 12($sp)
+    lw $s0, 16($sp)
+    addi $sp, $sp, 20
+    jr $ra
 
 
 # Part X

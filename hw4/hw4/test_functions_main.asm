@@ -8,10 +8,10 @@ player: .word 0x2912FECD
 
 .globl main
 main:
-la $a0, map_filename
-la $a1, map
-la $a2, player
-jal init_game
+# la $a0, map_filename
+# la $a1, map
+# la $a2, player
+# jal init_game
 
 # ############################
 # # Is Valid Cell
@@ -303,20 +303,42 @@ jal init_game
 # ###########################
 # Completing a Player's Attack
 # ########################### # test with new map, uncomment andi line
+# la $a0, map_filename_monsters
+# la $a1, map
+# la $a2, player
+# jal init_game
+# ###########################
+# la $a0, map
+# la $a1, player
+# jal monster_attacks
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ###########################
+
+# ###########################
+# Moving the Player
+# ########################### # test with new map, uncomment andi line
 la $a0, map_filename_monsters
 la $a1, map
 la $a2, player
 jal init_game
 # ###########################
-la $a0, map
-la $a1, player
-jal monster_attacks
-move $a0, $v0
-li $v0, 1
-syscall
-li $a0, '\n'
-li $v0, 11
-syscall
+# la $a0, map
+# la $a1, player
+# li $a2, 2
+# li $a3, 0
+# # change map to '.', '$', '*', '>'
+# jal player_move
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
 # ###########################
 
 exit:
