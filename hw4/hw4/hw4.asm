@@ -466,21 +466,92 @@ p6_done:
 
 
 # Part VII
+complete_attack:
+# a0 = address of Map struct
+# a1 = address of Player struct
+# a2 = target cell row
+# a3 = target cell col
+
+addi $sp, $sp, -20
+sw $s3, 16($sp)
+sw $s2, 12($sp)
+sw $s1, 8($sp)
+sw $s0, 4($sp)
+sw $ra, 0($sp)
+
+# externally determined if targeted cell can be validly attacked
+
+move $s0, $a0
+move $s1, $a1
+move $s2, $a2
+move $s3, $a3
+
+# get cell
+# map already in a0
+move $a1, $s2
+move $a2, $s3
+jal get_cell
+
+# ONLY FOR TESTING
+# andi $v0, $v0, 0x7F
+# UNCOMMENT TO TEST
+
+beq $v0, '/', p7_door
+
+lb $t0, 2($s1) # load player's current health
+beq $v0, 'm', p7_minion
+
+p7_boss:
+    li $t1, '*'
+    addi $t0, $t0, -2 # 2 points of damage
+    sb $t0, 2($s1) # store health
+    j p7_continue
+
+p7_minion:
+    li $t1, '$'
+    addi $t0, $t0, -1 # 1 point of damage
+    sb $t0, 2($s1) # store health
+    j p7_continue
+
+p7_door:
+    li $t1, '.'
+
+p7_continue:
+    # t1 = replacement character
+    move $a0, $s0
+    move $a1, $s2
+    move $a2, $s3
+    move $a3, $t1
+    jal set_cell
+
+    # check if player is dead
+    lb $t0, 2($s1)
+    bgt $t0, $0, p7_done # if health greater than 0
+    # player is dead
+    move $a0, $s0
+    lbu $a1, 0($s1)
+    lbu $a2, 1($s1)
+    li $a3, 'X'
+    jal set_cell
+
+p7_done:
+    lw $ra, 0($sp)
+    lw $s0, 4($sp)
+    lw $s1, 8($sp)
+    lw $s2, 12($sp)
+    lw $s3, 16($sp)
+    addi $sp, $sp, 20
+
+    jr $ra
+
+# Part VIII
 monster_attacks:
 li $v0, -200
 li $v1, -200
 jr $ra
 
-
-# Part VIII
-player_move:
-li $v0, -200
-li $v1, -200
-jr $ra
-
-
 # Part IX
-complete_attack:
+player_move:
 li $v0, -200
 li $v1, -200
 jr $ra

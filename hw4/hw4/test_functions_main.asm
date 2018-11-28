@@ -218,66 +218,87 @@ jal init_game
 # ###########################
 # Acquiring a Target to Attack
 # ########################### # test with new map, uncomment andi line 
-la $a0, map_filename_monsters
-la $a1, map
-la $a2, player
-jal init_game
-############################ expected = -1 (cannot attack a wall)
-la $a0, map
-la $a1, player
-li $a2, 'U'
-jal get_attack_target
-move $a0, $v0
-li $v0, 1
-syscall
-li $a0, '\n'
-li $v0, 11
-syscall
-############################ expected = ascii value of B = 66
-la $a0, map
-la $a1, player
-li $a2, 'D'
-jal get_attack_target
-move $a0, $v0
-li $v0, 1
-syscall
-li $a0, '\n'
-li $v0, 11
-syscall
-############################ expected = -1 (invalid index)
-la $a0, map
-la $a1, player
-li $a2, 'L'
-jal get_attack_target
-move $a0, $v0
-li $v0, 1
-syscall
-li $a0, '\n'
-li $v0, 11
-syscall
-############################ expected = ascii value of m = 109
-la $a0, map
-la $a1, player
-li $a2, 'R'
-jal get_attack_target
-move $a0, $v0
-li $v0, 1
-syscall
-li $a0, '\n'
-li $v0, 11
-syscall
-############################ expected = -1 (invalid argument)
-la $a0, map
-la $a1, player
-li $a2, 'Z'
-jal get_attack_target
-move $a0, $v0
-li $v0, 1
-syscall
-li $a0, '\n'
-li $v0, 11
-syscall
-############################
+# la $a0, map_filename_monsters
+# la $a1, map
+# la $a2, player
+# jal init_game
+# ############################ expected = -1 (cannot attack a wall)
+# la $a0, map
+# la $a1, player
+# li $a2, 'U'
+# jal get_attack_target
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################ expected = ascii value of B = 66
+# la $a0, map
+# la $a1, player
+# li $a2, 'D'
+# jal get_attack_target
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################ expected = -1 (invalid index)
+# la $a0, map
+# la $a1, player
+# li $a2, 'L'
+# jal get_attack_target
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################ expected = ascii value of m = 109
+# la $a0, map
+# la $a1, player
+# li $a2, 'R'
+# jal get_attack_target
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################ expected = -1 (invalid argument)
+# la $a0, map
+# la $a1, player
+# li $a2, 'Z'
+# jal get_attack_target
+# move $a0, $v0
+# li $v0, 1
+# syscall
+# li $a0, '\n'
+# li $v0, 11
+# syscall
+# ############################
+
+# ###########################
+# Completing a Player's Attack
+# ########################### # test with new map, uncomment andi line , test separately
+# la $a0, map_filename_monsters
+# la $a1, map
+# la $a2, player
+# jal init_game
+# ###########################
+# la $a0, map
+# la $a1, player
+# li $a2, 3
+# li $a3, 1
+# jal complete_attack
+# ###########################
+# la $a0, map
+# la $a1, player
+# li $a2, 4
+# li $a3, 0
+# jal complete_attack
+# ###########################
 
 exit:
 li $v0, 10
