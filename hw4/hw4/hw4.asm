@@ -764,9 +764,105 @@ p9_done:
 
 # Part X
 player_turn:
-li $v0, -200
-li $v1, -200
-jr $ra
+# a0 = Map struct address
+# a1 = Player struct address
+# a2 = char
+
+addi $sp, $sp, -24
+sw $s0, 20($sp)
+sw $s1, 16($sp)
+sw $s2, 12($sp)
+sw $s3, 8($sp)
+sw $s4, 4($sp)
+sw $ra, 0($sp)
+
+move $s0, $a0
+move $s1, $a1
+move $s2, $a2
+
+# load current player position
+lbu $s3, 0($s1) # s3 = player row
+lbu $s4, 1($s1) # s4 = player col
+
+beq $s2, 'U', p10_up
+beq $s2, 'D', p10_down
+beq $s2, 'L', p10_left
+beq $s2, 'R', p10_right
+j p10_character_error # not one of the valid characters
+
+p10_up:
+    addi $s3, $s3, -1
+    j p10_continue
+
+p10_down:
+    addi $s3, $s3, 1
+    j p10_continue
+
+p10_left:
+    addi $s4, $s4, -1
+    j p10_continue
+
+p10_right:
+    addi $s4, $s4, 1
+
+p10_continue:
+    # check if valid
+    move $a1, $s3
+    move $a2, $s4
+    jal is_valid_cell
+    bne $v0, $0, p10_zero_error
+    # otherwise index is valid
+
+    # get cell
+    move $a0, $s0
+    move $a1, $s3
+    move $a2, $s4
+    jal get_cell
+    beq $v0, '#', p10_zero_error
+    # otherwise target cell is moveable/attackable
+
+    # check if attackable
+    move $a0, $s0
+    move $a1, $s1
+    move $a2, $s2
+    jal get_attack_target
+    beq $v0, -1, p10_not_attackable
+    # otherwise target cell is attackable
+
+    # complete attack
+    move $a0, $s0
+    move $a1, $s1
+    move $a2, $s3
+    move $a3, $s4
+    jal complete_attack
+    j p10_zero_error
+
+p10_not_attackable:
+    # move player
+    move $a0, $s0
+    move $a1, $s1
+    move $a2, $s3
+    move $a3, $s4
+    jal player_move
+    # return move player's return value
+    j p10_done
+
+p10_zero_error:
+    li $v0, 0
+    j p10_done
+
+p10_character_error:
+    li $v0, -1
+
+p10_done:
+    lw $ra, 0($sp)
+    lw $s4, 4($sp)
+    lw $s3, 8($sp)
+    lw $s2, 12($sp)
+    lw $s1, 16($sp)
+    lw $s0, 20($sp)
+    addi $sp, $sp, 24
+    jr $ra
 
 
 # Part XI

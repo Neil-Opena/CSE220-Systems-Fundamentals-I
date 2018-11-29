@@ -38,7 +38,7 @@ print_map_row_loop:
     li $t4, 0 # t4 = col counter
     print_map_col_loop:
         bge $t4, $t2, continue_print_row
-        lbu $a0, ($t0) # FIXME check if hidden or not
+        lbu $a0, ($t0)
         andi $t6, $a0, 0x80
         # 1 == hidden from the player
         beqz $t6, not_hidden
@@ -129,32 +129,80 @@ lbu $a2, 1($t0) # player col
 jal reveal_area
 
 li $s0, 0  # move = 0
-
 game_loop:  # while player is not dead and move == 0:
 
-jal print_map # takes no args
-jal print_player_info # takes no args
+    jal print_map # takes no args
+    jal print_player_info # takes no args
 
-# print prompt
-la $a0, your_move_str
-li $v0, 4
-syscall
+    # print prompt
+    la $a0, your_move_str
+    li $v0, 4
+    syscall
 
-li $v0, 12  # read character from keyboard
-syscall
-move $s1, $v0  # $s1 has character entered
-li $s0, 0  # move = 0
+    li $v0, 12  # read character from keyboard
+    syscall
+    move $s1, $v0  # $s1 has character entered
+    li $s0, 0  # move = 0
 
-li $a0, '\n'
-li $v0 11
-syscall
+    li $a0, '\n'
+    li $v0 11
+    syscall
 
-# handle input: w, a, s or d
-# map w, a, s, d  to  U, L, D, R and call player_turn()
+    # handle input: w, a, s or d
+    # map w, a, s, d  to  U, L, D, R and call player_turn()
+    beq $s1, 'w', go_up
+    beq $s1, 's', go_down
+    beq $s1, 'a', go_left
+    beq $s1, 'd', go_right
 
-# if move == 0, call reveal_area()  Otherwise, exit the loop.
+    j continue_game_loop
 
-j game_loop
+    go_up:
+        la $a0, map
+        la $a1, player
+        li $a2, 'U'
+        jal player_turn
+        j continue_game_loop
+
+    go_down:
+        la $a0, map
+        la $a1, player
+        li $a2, 'D'
+        jal player_turn
+        j continue_game_loop
+
+    go_left:
+        la $a0, map
+        la $a1, player
+        li $a2, 'L'
+        jal player_turn
+        j continue_game_loop
+
+    go_right:
+        la $a0, map
+        la $a1, player
+        li $a2, 'R'
+        jal player_turn
+        j continue_game_loop
+
+    continue_game_loop:
+        move $s0, $v0
+
+        # handle char == 'r'
+        # if move == 0, call reveal_area()  Otherwise, exit the loop.
+        bne $s0, $0, exit_loop
+        la $t0, player
+        # check player health
+        lb $t1, 2($t0) # t1 = health
+        ble $t1, $0, exit_loop
+        la $a0, map
+        lbu $a1, 0($t0)
+        lbu $a2, 1($t0)
+        jal reveal_area
+
+        j game_loop
+
+exit_loop:
 
 game_over:
 jal print_map
