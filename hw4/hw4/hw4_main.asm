@@ -155,7 +155,7 @@ game_loop:  # while player is not dead and move == 0:
     beq $s1, 'a', go_left
     beq $s1, 'd', go_right
 
-    j continue_game_loop
+    j game_loop
 
     go_up:
         la $a0, map
@@ -212,6 +212,13 @@ li $v0, 11
 syscall
 
 # choose between (1) player dead, (2) player escaped but lost, (3) player escaped and won
+la $t0, player
+lb $t1, 2($t0)
+ble $t1, $0, player_dead
+
+li $t1, 3
+lbu $t2, 3($t0)
+blt $t2, $t1, failed
 
 won:
 la $a0, you_won_str
