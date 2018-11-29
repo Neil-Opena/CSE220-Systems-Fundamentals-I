@@ -668,11 +668,12 @@ player_move:
 # a3 = target cell col
 
 # externally deremined if the player can attempt to move to the target cell
-addi $sp, $sp, -20
-sw $s0, 16($sp)
-sw $s1, 12($sp)
-sw $s2, 8($sp)
-sw $s3, 4($sp)
+addi $sp, $sp, -24
+sw $s0, 20($sp)
+sw $s1, 16($sp)
+sw $s2, 12($sp)
+sw $s3, 8($sp)
+sw $s4, 4($sp) # s4 = hold target cell char
 sw $ra, 0($sp)
 
 move $s0, $a0
@@ -691,7 +692,6 @@ sb $t0, 2($s1) # store player health
 
 bgt $t0, $0, p9_check_cell # still alive
 # Nearby monsters killed the player
-# set plyaer position to 'X'
 move $a0, $s0
 lbu $a1, 0($s1)
 lbu $a2, 1($s1)
@@ -702,20 +702,63 @@ li $v0, 0
 j p9_done
 
 p9_check_cell:
-# target cell == '.' --> return 0
+move $a0, $s0
+move $a1, $s2
+move $a2, $s3
+jal get_cell
+# ONLY FOR TESTING
+# andi $v0, $v0, 0x7F
+# UNCOMMENT TO TEST
+move $s4, $v0 # s4 = target cell character
 
-# target cell == '$' --> return 0
+# replace player's position with '.'
+move $a0, $s0
+lbu $a1, 0($s1)
+lbu $a2, 1($s1)
+li $a3, '.'
+jal set_cell
 
-# target cell == '*' --> return 0
+# replace target's position with '@'
+move $a0, $s0
+move $a1, $s2
+move $a2, $s3
+li $a3, '@'
+jal set_cell
 
-# target cell == '>' --> return -1
+# update Player struct's position
+sb $s2, 0($s1)
+sb $s3, 1($s1)
+
+beq $s4, '>', p9_door
+beq $s4, '.', p9_floor
+# otherwise it is a coin or gem
+
+lbu $t0, 3($s1) # load coin count
+beq $s4, '$', p9_coin
+p9_gem:
+    addi $t0, $t0, 4 # add 4 (will add 1 below --> 5)
+
+p9_coin:
+    addi $t0, $t0, 1 # add 1
+    sb $t0, 3($s1)
+    li $v0, 0
+    j p9_done
+
+p9_floor:
+    li $v0, 0
+    j p9_done
+
+p9_door:
+    li $v0, -1
+
 p9_done:
     lw $ra, 0($sp)
-    lw $s3, 4($sp)
-    lw $s2, 8($sp)
-    lw $s1, 12($sp)
-    lw $s0, 16($sp)
-    addi $sp, $sp, 20
+    lw $s4, 4($sp)
+    lw $s3, 8($sp)
+    lw $s2, 12($sp)
+    lw $s1, 16($sp)
+    lw $s0, 20($sp)
+    addi $sp, $sp, 24
     jr $ra
 
 

@@ -327,18 +327,18 @@ la $a1, map
 la $a2, player
 jal init_game
 # ###########################
-# la $a0, map
-# la $a1, player
-# li $a2, 2
-# li $a3, 0
-# # change map to '.', '$', '*', '>'
-# jal player_move
-# move $a0, $v0
-# li $v0, 1
-# syscall
-# li $a0, '\n'
-# li $v0, 11
-# syscall
+la $a0, map
+la $a1, player
+li $a2, 2
+li $a3, 0
+# change map to '.', '$', '*', '>'
+jal player_move
+move $a0, $v0
+li $v0, 1
+syscall
+li $a0, '\n'
+li $v0, 11
+syscall
 # ###########################
 
 exit:
