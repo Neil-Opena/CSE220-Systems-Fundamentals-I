@@ -154,7 +154,7 @@ game_loop:  # while player is not dead and move == 0:
     beq $s1, 's', go_down
     beq $s1, 'a', go_left
     beq $s1, 'd', go_right
-
+    beq $s1, 'r', flood_fill
     j game_loop
 
     go_up:
@@ -184,6 +184,14 @@ game_loop:  # while player is not dead and move == 0:
         li $a2, 'R'
         jal player_turn
         j continue_game_loop
+
+    flood_fill:
+        la $a0, map
+        la $t0, player
+        lbu $a1, 0($t0)
+        lbu $a2, 1($t0)
+        la $a3, visited
+        jal flood_fill_reveal
 
     continue_game_loop:
         move $s0, $v0
